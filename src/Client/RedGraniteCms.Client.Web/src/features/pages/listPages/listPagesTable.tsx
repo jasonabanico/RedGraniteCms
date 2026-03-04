@@ -3,14 +3,14 @@ import { createSelector } from "reselect";
 import { Container, Table, Button } from "react-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../../app/hooks";
-import { setItems, resetInitialLoad, deleteItem } from "./listItemsTableSlice";
-import itemService from "../../../services/items";
-import { makeSelectInitialLoad, makeSelectItems, makeSelectPage } from "./selectors";
+import { setPages, resetInitialLoad, deletePage } from "./listPagesTableSlice";
+import pageService from "../../../services/pages";
+import { makeSelectInitialLoad, makeSelectPages, makeSelectPage } from "./selectors";
 import { LoadingSpinner, ErrorAlert } from "../../../components";
 import { GetItems_GetItems } from "../../../services/items/__generated__/GetItems";
 
-const itemsSelector = createSelector(makeSelectItems, (items) => ({
-    items,
+const pagesSelector = createSelector(makeSelectPages, (pages) => ({
+    pages,
 }));
 
 const initialLoadSelector = createSelector(makeSelectInitialLoad, (initialLoad) => ({
@@ -21,8 +21,8 @@ const pageSelector = createSelector(makeSelectPage, (page) => ({
     page,
 }));
 
-export function ListItemsTable() {
-    const { items } = useAppSelector(itemsSelector);
+export function ListPagesTable() {
+    const { pages } = useAppSelector(pagesSelector);
     const { initialLoad } = useAppSelector(initialLoadSelector);
     const { page } = useAppSelector(pageSelector);
     const dispatch = useAppDispatch();
@@ -30,42 +30,42 @@ export function ListItemsTable() {
     const navigate = useNavigate();
     const updated = location.state?.updated;
     const prevPageRef = useRef<number | undefined>(undefined);
-    
+
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    const fetchItems = async () => {
+    const fetchPages = async () => {
         try {
             setIsLoading(true);
             setError(null);
-            const fetchedItems = await itemService.getItems("");
-            if (fetchedItems) {
-                dispatch(setItems(fetchedItems));
+            const fetchedPages = await pageService.getPages("");
+            if (fetchedPages) {
+                dispatch(setPages(fetchedPages));
             }
         } catch (err) {
-            console.error("Error fetching items:", err);
-            setError("Failed to load items. Please try again.");
+            console.error("Error fetching pages:", err);
+            setError("Failed to load pages. Please try again.");
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        if (initialLoad && (!items || items.length === 0)) {
-            fetchItems();
+        if (initialLoad && (!pages || pages.length === 0)) {
+            fetchPages();
             dispatch(resetInitialLoad());
         }
         if (updated) {
-            fetchItems();
+            fetchPages();
             navigate(location.pathname, { replace: true });
         }
         prevPageRef.current = page;
-    }, [initialLoad, items, page, updated, dispatch, navigate, location.pathname]);
+    }, [initialLoad, pages, page, updated, dispatch, navigate, location.pathname]);
 
     useEffect(() => {
         if (!initialLoad && prevPageRef.current !== page) {
-            fetchItems();
+            fetchPages();
         }
         prevPageRef.current = page;
     }, [page, initialLoad]);
@@ -73,67 +73,67 @@ export function ListItemsTable() {
     const handleDelete = async (id: string) => {
         try {
             setDeletingId(id);
-            const deleteAction = await dispatch(deleteItem(id));
-            
-            if (deleteItem.fulfilled.match(deleteAction)) {
-                dispatch(setItems(items?.filter((item: GetItems_GetItems) => item.id !== id) || []));
+            const deleteAction = await dispatch(deletePage(id));
+
+            if (deletePage.fulfilled.match(deleteAction)) {
+                dispatch(setPages(pages?.filter((p: GetItems_GetItems) => p.id !== id) || []));
             } else {
-                setError("Failed to delete item. Please try again.");
+                setError("Failed to delete page. Please try again.");
             }
         } catch (err) {
-            console.error("Error deleting item:", err);
-            setError("Failed to delete item. Please try again.");
+            console.error("Error deleting page:", err);
+            setError("Failed to delete page. Please try again.");
         } finally {
             setDeletingId(null);
         }
     };
 
-    if (isLoading && (!items || items.length === 0)) {
-        return <LoadingSpinner message="Loading items..." />;
+    if (isLoading && (!pages || pages.length === 0)) {
+        return <LoadingSpinner message="Loading pages..." />;
     }
 
     return (
         <Container>
             {error && <ErrorAlert message={error} onDismiss={() => setError(null)} />}
-            
-            <Link to="/addItem" className='btn btn-success my-3'>Add</Link>
-            
+
+            <Link to="/addPage" className='btn btn-success my-3'>Add Page</Link>
+
             {isLoading && <div className="text-muted mb-2">Refreshing...</div>}
-            
-            <Table className='itemsTable'>
+
+            <Table className='pagesTable'>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Short Description</th>
+                        <th>Title</th>
+                        <th>Slug</th>
+                        <th>Summary</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {items && items.map((item: GetItems_GetItems) => (
-                        <tr key={item.id}>
-                            <td>{item.id}</td>
-                            <td>{item.name}</td>
-                            <td>{item.shortDescription}</td>
+                    {pages && pages.map((p: GetItems_GetItems) => (
+                        <tr key={p.id}>
+                            <td>{p.title}</td>
+                            <td>{p.slug}</td>
+                            <td>{p.summary}</td>
                             <td>
                                 <div className="d-flex align-items-center gap-2 flex-wrap">
-                                    <Link to={`/editItem/${item.id}`} className='btn bt-sm btn-primary' style={{ whiteSpace: "nowrap" }}>Edit</Link>
-                                    <Button 
-                                        className='btn bt-sm btn-danger' 
-                                        style={{ whiteSpace: "nowrap" }} 
-                                        onClick={() => handleDelete(item.id)}
-                                        disabled={deletingId === item.id}
+                                    <Link to={`/editPage/${p.id}`} className='btn bt-sm btn-primary' style={{ whiteSpace: "nowrap" }}>Edit</Link>
+                                    <Button
+                                        className='btn bt-sm btn-danger'
+                                        style={{ whiteSpace: "nowrap" }}
+                                        onClick={() => handleDelete(p.id)}
+                                        disabled={deletingId === p.id}
                                     >
-                                        {deletingId === item.id ? 'Deleting...' : 'Delete'}
+                                        {deletingId === p.id ? 'Deleting...' : 'Delete'}
                                     </Button>
                                 </div>
                             </td>
                         </tr>
                     ))}
-                    {(!items || items.length === 0) && !isLoading && (
+                    {(!pages || pages.length === 0) && !isLoading && (
                         <tr>
                             <td colSpan={4} className="text-center text-muted py-4">
-                                No items found. Click "Add" to create your first item.
+                                No pages found. Click "Add Page" to create your first page.
                             </td>
                         </tr>
                     )}

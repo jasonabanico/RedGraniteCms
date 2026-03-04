@@ -28,11 +28,10 @@ export class ServiceError extends Error {
  */
 function extractErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof ApolloError) {
-    // Check for GraphQL errors with codes
     const graphQLError = error.graphQLErrors?.[0];
     if (graphQLError) {
       const code = graphQLError.extensions?.code as string | undefined;
-      
+
       switch (code) {
         case 'NOT_FOUND':
           return 'The requested item was not found.';
@@ -44,17 +43,16 @@ function extractErrorMessage(error: unknown, fallback: string): string {
           return graphQLError.message || fallback;
       }
     }
-    
-    // Network error
+
     if (error.networkError) {
       return 'Unable to connect to the server. Please check your connection.';
     }
   }
-  
+
   if (error instanceof Error) {
     return error.message;
   }
-  
+
   return fallback;
 }
 
@@ -71,10 +69,13 @@ function extractErrorCode(error: unknown): string {
 }
 
 /**
- * Item service for GraphQL operations.
- * Uses factory function instead of singleton for better testability.
+ * Core Item service — the shared foundation for all GraphQL Item operations.
+ *
+ * Module-level services (PageService, UserProfileService, etc.) delegate to
+ * this class so that GraphQL queries, mutations, caching, and error handling
+ * are defined in one place.
  */
-class ItemService {
+export class ItemService {
   async getItem(id: string | undefined): Promise<GetItem> {
     if (!id) {
       throw new ServiceError('Item ID is required.', 'VALIDATION_ERROR');
@@ -84,7 +85,7 @@ class ItemService {
       const response = await apolloClient.query({
         query: GET_ITEM,
         variables: { id },
-        fetchPolicy: 'network-only', // Don't cache single item queries
+        fetchPolicy: 'network-only',
       });
 
       if (!response?.data) {
@@ -100,7 +101,7 @@ class ItemService {
       );
     }
   }
-   
+
   async getItems(isoDateString: string, count = 20): Promise<GetItems["GetItems"]> {
     try {
       const response = await apolloClient.query({
@@ -121,7 +122,7 @@ class ItemService {
       );
     }
   }
-  
+
   async addItem(item: ItemInput): Promise<AddItem> {
     try {
       const response = await apolloClient.mutate({
@@ -178,11 +179,11 @@ class ItemService {
         mutation: DELETE_ITEM,
         variables: { id },
       });
-  
+
       if (!response?.data) {
         throw new ServiceError('Failed to delete item.', 'MUTATION_ERROR');
       }
-  
+
       return response.data.DeleteItem ?? false;
     } catch (error) {
       throw new ServiceError(
@@ -191,18 +192,17 @@ class ItemService {
         error instanceof Error ? error : undefined
       );
     }
-  }  
+  }
 }
 
 /**
- * Factory function to create ItemService instance.
- * For production use, use the default export.
+ * Factory function to create ItemService instances.
  * For testing, call createItemService() with mocked dependencies.
  */
 export function createItemService(): ItemService {
   return new ItemService();
 }
 
-// Default instance for convenience
+// Default singleton instance
 const itemService = createItemService();
 export default itemService;

@@ -9,9 +9,10 @@
 
 export interface ItemInput {
   id: string;
-  name: string;
-  shortDescription: string;
-  longDescription: string;
+  title: string;
+  slug?: string;
+  summary?: string;
+  content?: string;
 }
 
 //==============================================================

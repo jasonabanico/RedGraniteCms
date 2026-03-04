@@ -10,15 +10,12 @@
 export interface GetItem_GetItem {
   __typename: "Item";
   id: string;
-  name: string;
-  shortDescription: string;
-  longDescription: string;
+  title: string;
+  slug: string | null;
+  summary: string | null;
+  content: string | null;
 }
 
 export interface GetItem {
   GetItem: GetItem_GetItem;
-}
-
-export interface GetItemVariables {
-  id: string;
 }

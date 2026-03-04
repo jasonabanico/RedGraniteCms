@@ -4,15 +4,15 @@ import {
   Action,
   combineReducers
 } from "@reduxjs/toolkit";
-import listItemsTableReducer from "../features/items/listItems/listItemsTableSlice";
-import addItemFormReducer from "../features/items/addItem/addItemFormSlice";
-import editItemFormReducer from '../features/items/editItem/editItemFormSlice';
+import listPagesTableReducer from "../features/pages/listPages/listPagesTableSlice";
+import addPageFormReducer from "../features/pages/addPage/addPageFormSlice";
+import editPageFormReducer from '../features/pages/editPage/editPageFormSlice';
 import ReduxLogger from "redux-logger";
 
 const rootReducer = combineReducers({
-  listItemsTable: listItemsTableReducer,
-  addItemForm: addItemFormReducer,
-  editItemForm: editItemFormReducer,
+  listPagesTable: listPagesTableReducer,
+  addPageForm: addPageFormReducer,
+  editPageForm: editPageFormReducer,
 });
 
 export const store = configureStore({

@@ -17,7 +17,3 @@ export interface AddItem_AddItem {
 export interface AddItem {
   AddItem: AddItem_AddItem | null;
 }
-
-export interface AddItemVariables {
-  item: ItemInput;
-}

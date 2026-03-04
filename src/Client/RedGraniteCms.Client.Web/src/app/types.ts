@@ -1,9 +1,9 @@
-import { IAddItemFormState } from "../features/items/addItem/types";
-import { IEditItemFormState } from "../features/items/editItem/types";
-import { IListItemsTableState } from "../features/items/listItems/types";
+import { IAddPageFormState } from "../features/pages/addPage/types";
+import { IEditPageFormState } from "../features/pages/editPage/types";
+import { IListPagesTableState } from "../features/pages/listPages/types";
 
 export interface IRootState {
-  listItemsTable: IListItemsTableState;
-  addItemForm: IAddItemFormState;
-  editItemForm: IEditItemFormState;
+  listPagesTable: IListPagesTableState;
+  addPageForm: IAddPageFormState;
+  editPageForm: IEditPageFormState;
 }

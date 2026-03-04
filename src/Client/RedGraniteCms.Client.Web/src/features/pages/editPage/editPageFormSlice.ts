@@ -1,19 +1,19 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import itemService from '../../../services/items';
+import pageService from '../../../services/pages';
 import { ItemInput } from '../../../../__generated__/globalTypes';
-import { IEditItemFormState } from './types';
+import { IEditPageFormState } from './types';
 
-const initialState: IEditItemFormState = {
+const initialState: IEditPageFormState = {
     status: 'idle',
     error: null,
-    item: null
+    page: null
 };
 
-export const updateItem = createAsyncThunk(
-    'editItemForm/updateItem',
+export const updatePage = createAsyncThunk(
+    'editPageForm/updatePage',
     async (itemInput: ItemInput, { rejectWithValue }) => {
         try {
-            const data = await itemService.updateItem(itemInput);
+            const data = await pageService.updatePage(itemInput);
             return data;
         } catch (err: any) {
             return rejectWithValue(err.response?.data || 'Unknown error');
@@ -21,30 +21,30 @@ export const updateItem = createAsyncThunk(
     }
 );
 
-const editItemFormSlice = createSlice({
-    name: 'editItemForm',
+const editPageFormSlice = createSlice({
+    name: 'editPageForm',
     initialState,
     reducers: {
         resetEditForm: (state) => {
             state.status = 'idle';
             state.error = null;
-            state.item = null;
+            state.page = null;
         }
     },
     extraReducers: (builder) => {
         builder
-            .addCase(updateItem.pending, (state) => {
+            .addCase(updatePage.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(updateItem.fulfilled, (state) => {
+            .addCase(updatePage.fulfilled, (state) => {
                 state.status = 'succeeded';
             })
-            .addCase(updateItem.rejected, (state, action) => {
+            .addCase(updatePage.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = typeof action.payload === 'string' ? action.payload : 'Failed to save existing item';
+                state.error = typeof action.payload === 'string' ? action.payload : 'Failed to save page';
             });
     }
 });
 
-export const { resetEditForm } = editItemFormSlice.actions;
-export default editItemFormSlice.reducer;
+export const { resetEditForm } = editPageFormSlice.actions;
+export default editPageFormSlice.reducer;

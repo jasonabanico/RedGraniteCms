@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { AddItemForm } from './features/items/addItem/addItemForm';
-import { EditItemForm } from "./features/items/editItem/editItemForm";
+import { AddPageForm } from './features/pages/addPage/addPageForm';
+import { EditPageForm } from "./features/pages/editPage/editPageForm";
 import { HomePage } from "./pages/HomePage";
 import { ErrorBoundary } from "./components";
 
@@ -22,8 +22,8 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/addItem" element={<AddItemForm />} />
-            <Route path="/editItem/:itemId" element={<EditItemForm />} />
+            <Route path="/addPage" element={<AddPageForm />} />
+            <Route path="/editPage/:pageId" element={<EditPageForm />} />
           </Routes>
         </Router>
       </AppContainer>

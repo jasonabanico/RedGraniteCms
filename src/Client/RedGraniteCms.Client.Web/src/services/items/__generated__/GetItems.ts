@@ -10,8 +10,9 @@
 export interface GetItems_GetItems {
   __typename: "Item";
   id: string;
-  name: string;
-  shortDescription: string;
+  title: string;
+  slug: string | null;
+  summary: string | null;
 }
 
 export interface GetItems {

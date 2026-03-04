@@ -17,7 +17,3 @@ export interface UpdateItem_UpdateItem {
 export interface UpdateItem {
   UpdateItem: UpdateItem_UpdateItem | null;
 }
-
-export interface UpdateItemVariables {
-  item: ItemInput;
-}

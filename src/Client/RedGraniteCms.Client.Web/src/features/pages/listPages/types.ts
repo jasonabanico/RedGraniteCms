@@ -1,7 +1,7 @@
 import { GetItems } from "../../../services/items/__generated__/GetItems";
 
-export interface IListItemsTableState {
+export interface IListPagesTableState {
     initialLoad: boolean;
     page: number;
-    items: GetItems["GetItems"] | null;
+    pages: GetItems["GetItems"] | null;
 }
