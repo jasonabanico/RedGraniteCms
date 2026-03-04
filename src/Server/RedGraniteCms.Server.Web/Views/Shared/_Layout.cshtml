@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RedGraniteCms</title>
+    @if (ViewData["MetaDescription"] is string metaDesc)
+    {
+        <meta name="description" content="@metaDesc" />
+    }
+    @if (ViewData["OgImageUrl"] is string ogImage)
+    {
+        <meta property="og:image" content="@ogImage" />
+    }
+    <link rel="stylesheet" href="~/css/site.css" />
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/">RedGraniteCms</a>
+        </nav>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer>
+        <p>&copy; @DateTime.UtcNow.Year RedGraniteCms</p>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

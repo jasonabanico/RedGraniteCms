@@ -1,0 +1,41 @@
+@model PageViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["MetaDescription"] = Model.MetaDescription;
+    ViewData["OgImageUrl"] = Model.OgImageUrl;
+}
+
+<article lang="@Model.Language">
+    <h1>@Model.Title</h1>
+
+    @if (Model.PublishedAt.HasValue)
+    {
+        <time datetime="@Model.PublishedAt.Value.ToString("o")">
+            @Model.PublishedAt.Value.ToString("MMMM d, yyyy")
+        </time>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Summary))
+    {
+        <p class="summary">@Model.Summary</p>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Content))
+    {
+        <div class="content">
+            @Html.Raw(Model.Content)
+        </div>
+    }
+
+    @if (Model.Tags.Any())
+    {
+        <footer>
+            <ul class="tags">
+            @foreach (var tag in Model.Tags)
+            {
+                <li>@tag</li>
+            }
+            </ul>
+        </footer>
+    }
+</article>

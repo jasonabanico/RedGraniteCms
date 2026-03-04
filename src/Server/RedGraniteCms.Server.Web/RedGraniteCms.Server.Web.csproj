@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>RedGraniteCms.Server.Web</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RedGraniteCms.Server.Core\RedGraniteCms.Server.Core.csproj" />
+    <ProjectReference Include="..\RedGraniteCms.Server.Data\RedGraniteCms.Server.Data.csproj" />
+    <ProjectReference Include="..\RedGraniteCms.Server.Services\RedGraniteCms.Server.Services.csproj" />
+  </ItemGroup>
+
+</Project>

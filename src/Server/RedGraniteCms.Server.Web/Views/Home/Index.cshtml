@@ -1,0 +1,26 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<h1>Welcome</h1>
+
+@if (Model.Pages.Any())
+{
+    <ul>
+    @foreach (var p in Model.Pages)
+    {
+        <li>
+            <a href="/@p.Slug">@p.Title</a>
+            @if (!string.IsNullOrEmpty(p.Summary))
+            {
+                <p>@p.Summary</p>
+            }
+        </li>
+    }
+    </ul>
+}
+else
+{
+    <p>No pages published yet.</p>
+}

@@ -1,0 +1,24 @@
+/* RedGraniteCms — minimal site styles */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #222; }
+
+body { max-width: 48rem; margin: 0 auto; padding: 1rem 1.5rem; }
+
+header nav { padding: 1rem 0; border-bottom: 1px solid #ddd; }
+header nav a { font-weight: 600; text-decoration: none; color: inherit; }
+
+main { padding: 2rem 0; }
+
+footer { border-top: 1px solid #ddd; padding: 1rem 0; font-size: 0.875rem; color: #666; }
+
+h1 { margin-top: 0; }
+
+article time { display: block; color: #666; font-size: 0.875rem; margin-bottom: 1rem; }
+article .summary { font-size: 1.1rem; color: #444; }
+article .content { margin-top: 1.5rem; }
+
+.tags { list-style: none; padding: 0; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.tags li { background: #eee; padding: 0.2rem 0.6rem; border-radius: 0.25rem; font-size: 0.8rem; }
+
+a { color: #0066cc; }
