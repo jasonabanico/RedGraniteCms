@@ -9,11 +9,11 @@
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/jasonabanico/redgranite.git
+   git clone https://github.com/jasonabanico/redgranitecms.git
    ```
 2. Navigate to the project directory:
    ```bash
-   cd redgranite
+   cd redgranitecms
    ```
 3. Install dependencies:
    - For the client (frontend):
@@ -29,7 +29,7 @@
 ## Database Configuration
 1. Add storage.
    - This implementation defaults to Azure CosmosDB (while also supporting other data implementations with EntityFramework).
-   - Update the appsettings.Development.json file at src\Server\RedGranite.Server.Api and provide a value for the Cosmos connection.
+   - Update the appsettings.Development.json file at src\Server\RedGraniteCms.Server.Api and provide a value for the Cosmos connection.
      ```json
         "ConnectionStrings": {
             "CosmosConnection": "[connection string]"
@@ -40,7 +40,7 @@
 1. Start the server:
    - Navigate to the server directory:
      ```bash
-     cd src\Server\RedGranite.Server.Api
+     cd src\Server\RedGraniteCms.Server.Api
      ```
    - Run the server:
      ```bash
@@ -49,7 +49,7 @@
 2. Start the client:
    - Navigate to the client directory:
      ```bash
-     cd src\Client\RedGranite.Client.Web
+     cd src\Client\RedGraniteCms.Client.Web
      ```
    - Run the client (development mode with Vite):
      ```bash

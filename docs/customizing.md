@@ -1,12 +1,12 @@
 # Extending and Customizing
 
-This guide covers how to extend the RedGranite boilerplate with new features and customize it for your application.
+This guide covers how to extend the RedGraniteCms boilerplate with new features and customize it for your application.
 
 ## Backend
 
 ### Adding a New Entity
 
-1. **Create the domain model** in `RedGranite.Server.Core/Models/`:
+1. **Create the domain model** in `RedGraniteCms.Server.Core/Models/`:
    ```csharp
    public class Product : EntityBase
    {
@@ -45,19 +45,19 @@ This guide covers how to extend the RedGranite boilerplate with new features and
    }
    ```
 
-2. **Create interfaces** in `RedGranite.Server.Core/Interfaces/`:
+2. **Create interfaces** in `RedGraniteCms.Server.Core/Interfaces/`:
    - `IProductRepository.cs`
    - `IProductService.cs`
 
-3. **Create repository** in `RedGranite.Server.Data/Repositories/`:
+3. **Create repository** in `RedGraniteCms.Server.Data/Repositories/`:
    - Add `ProductRepository.cs` implementing `IProductRepository`
    - Add `DbSet<Product>` to `AppDbContext.cs`
 
-4. **Create service** in `RedGranite.Server.Services/`:
+4. **Create service** in `RedGraniteCms.Server.Services/`:
    - Add `ProductService.cs` with logging and error handling
    - Register in `ServiceExtensions.cs`
 
-5. **Create GraphQL types** in `RedGranite.Server.GraphQl/`:
+5. **Create GraphQL types** in `RedGraniteCms.Server.GraphQl/`:
    - Add `ProductInput.cs` in `Types/`
    - Add `ProductInputValidator.cs` in `Validators/`
    - Add `ProductQuery.cs` in `Queries/`
@@ -66,7 +66,7 @@ This guide covers how to extend the RedGranite boilerplate with new features and
 
 ### Adding Custom Exceptions
 
-Create exception types in `RedGranite.Server.Core/Exceptions/`:
+Create exception types in `RedGraniteCms.Server.Core/Exceptions/`:
 
 ```csharp
 public class BusinessRuleException : Exception
@@ -223,14 +223,14 @@ dotnet test
 ```
 
 Add new tests in the corresponding test project:
-- `RedGranite.Server.Core.Tests` - Domain model tests
-- `RedGranite.Server.Services.Tests` - Service layer tests with mocked repositories
+- `RedGraniteCms.Server.Core.Tests` - Domain model tests
+- `RedGraniteCms.Server.Services.Tests` - Service layer tests with mocked repositories
 
 ### Client-Side Tests
 
 Run tests:
 ```bash
-cd src/Client/RedGranite.Client.Web
+cd src/Client/RedGraniteCms.Client.Web
 npm test
 ```
 

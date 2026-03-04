@@ -1,7 +1,7 @@
-# RedGranite: React + Redux Toolkit + GraphQL + .Net Boilerplate
+# RedGraniteCms: React + Redux Toolkit + GraphQL + .Net Boilerplate
 
 ## Description
-RedGranite is a full-stack boilerplate designed to help developers quickly build applications using React, Redux Toolkit, GraphQL, and .Net. It provides a solid foundation for creating scalable and maintainable applications with full CRUD (Create, Read, Update, Delete) functionality, leveraging GraphQL for efficient data operations.
+RedGraniteCms is a full-stack boilerplate designed to help developers quickly build applications using React, Redux Toolkit, GraphQL, and .Net. It provides a solid foundation for creating scalable and maintainable applications with full CRUD (Create, Read, Update, Delete) functionality, leveraging GraphQL for efficient data operations.
 
 ## Features
 
@@ -29,7 +29,7 @@ RedGranite is a full-stack boilerplate designed to help developers quickly build
 
 ```bash
 # Clone the repository
-git clone https://github.com/jasonabanico/RedGranite.git
+git clone https://github.com/jasonabanico/RedGraniteCms.git
 
 # Server
 cd src
@@ -37,7 +37,7 @@ dotnet restore
 dotnet build
 
 # Client
-cd src/Client/RedGranite.Client.Web
+cd src/Client/RedGraniteCms.Client.Web
 npm install
 npm run dev
 ```
@@ -58,32 +58,32 @@ Configure in `appsettings.json`:
 - `ConnectionStrings:CosmosConnection` - CosmosDB connection string
 
 ## Docs
-- [Setup](https://github.com/jasonabanico/RedGranite/blob/main/docs/setup.md)
-- [GraphQL](https://github.com/jasonabanico/RedGranite/blob/main/docs/graphql.md)
-- [Extending and Customizing](https://github.com/jasonabanico/RedGranite/blob/main/docs/customizing.md)
+- [Setup](https://github.com/jasonabanico/RedGraniteCms/blob/main/docs/setup.md)
+- [GraphQL](https://github.com/jasonabanico/RedGraniteCms/blob/main/docs/graphql.md)
+- [Extending and Customizing](https://github.com/jasonabanico/RedGraniteCms/blob/main/docs/customizing.md)
 
 ## Project Structure
 
 ```
 src/
 ├── Server/
-│   ├── RedGranite.Server.Api/          # ASP.NET Core API host
-│   ├── RedGranite.Server.Core/         # Domain models & interfaces
+│   ├── RedGraniteCms.Server.Api/          # ASP.NET Core API host
+│   ├── RedGraniteCms.Server.Core/         # Domain models & interfaces
 │   │   ├── Exceptions/                 # Custom exception types
 │   │   ├── Interfaces/                 # Repository & service contracts
 │   │   └── Models/                     # Domain entities
-│   ├── RedGranite.Server.Data/         # EF Core + CosmosDB
-│   ├── RedGranite.Server.Services/     # Business logic layer
-│   ├── RedGranite.Server.GraphQl/      # HotChocolate GraphQL
+│   ├── RedGraniteCms.Server.Data/         # EF Core + CosmosDB
+│   ├── RedGraniteCms.Server.Services/     # Business logic layer
+│   ├── RedGraniteCms.Server.GraphQl/      # HotChocolate GraphQL
 │   │   ├── Errors/                     # Error filter
 │   │   ├── Mutations/                  # GraphQL mutations
 │   │   ├── Queries/                    # GraphQL queries
 │   │   ├── Types/                      # Input types
 │   │   └── Validators/                 # FluentValidation validators
-│   ├── RedGranite.Server.Core.Tests/   # Domain model tests
-│   └── RedGranite.Server.Services.Tests/ # Service layer tests
+│   ├── RedGraniteCms.Server.Core.Tests/   # Domain model tests
+│   └── RedGraniteCms.Server.Services.Tests/ # Service layer tests
 └── Client/
-    └── RedGranite.Client.Web/
+    └── RedGraniteCms.Client.Web/
         └── src/
             ├── app/                    # Redux store & typed hooks
             ├── components/             # Shared UI components
@@ -101,7 +101,7 @@ cd src
 dotnet test
 
 # Client
-cd src/Client/RedGranite.Client.Web
+cd src/Client/RedGraniteCms.Client.Web
 npm test
 ```
 

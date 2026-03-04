@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-RedGraniteCms.Api-45860cb5-7fe5-4d0f-9beb-d9b98596042e</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RedGraniteCms.Server.Core\RedGraniteCms.Server.Core.csproj" />
+    <ProjectReference Include="..\RedGraniteCms.Server.Data\RedGraniteCms.Server.Data.csproj" />
+    <ProjectReference Include="..\RedGraniteCms.Server.GraphQl\RedGraniteCms.Server.GraphQl.csproj" />
+    <ProjectReference Include="..\RedGraniteCms.Server.Services\RedGraniteCms.Server.Services.csproj" />
+  </ItemGroup>
+
+</Project>
