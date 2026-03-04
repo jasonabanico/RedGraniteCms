@@ -64,7 +64,7 @@ public class Item : ContentEntity
     /// Ordered ancestor IDs from root to immediate parent.
     /// Enables efficient tree queries without recursive joins.
     /// </summary>
-    public IReadOnlyList<string> AncestorIds { get; private set; } = [];
+    public IReadOnlyList<string> AncestorIds { get; private set; } = Array.Empty<string>();
 
     /// <summary>
     /// Explicit sort position among siblings under the same parent.
@@ -87,7 +87,7 @@ public class Item : ContentEntity
     ///   "hero_image_url": "https://..."
     /// }
     /// </summary>
-    public JsonObject Metadata { get; private set; } = [];
+    public JsonObject Metadata { get; private set; } = new JsonObject();
 
     /// <summary>Case-insensitive folksonomy tags.</summary>
     public IReadOnlySet<string> Tags { get; private set; } =

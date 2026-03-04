@@ -18,21 +18,23 @@ public class AppDbContext : DbContext
         item.HasKey(e => e.Id);
 
         // Value converters for complex types
+        var jsonOptions = new JsonSerializerOptions();
+
         item.Property(e => e.Metadata)
             .HasConversion(
-                v => v.ToJsonString(),
-                v => JsonNode.Parse(v)!.AsObject());
+                v => v.ToJsonString(null),
+                v => JsonNode.Parse(v, null, default)!.AsObject());
 
         item.Property(e => e.Tags)
             .HasConversion(
-                v => JsonSerializer.Serialize(v.ToList(), (JsonSerializerOptions?)null),
+                v => JsonSerializer.Serialize(v.ToList(), jsonOptions),
                 v => (IReadOnlySet<string>)new HashSet<string>(
-                    JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? [],
+                    JsonSerializer.Deserialize<List<string>>(v, jsonOptions) ?? new List<string>(),
                     StringComparer.OrdinalIgnoreCase));
 
         item.Property(e => e.AncestorIds)
             .HasConversion(
-                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                v => (IReadOnlyList<string>)(JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>()));
+                v => JsonSerializer.Serialize(v, jsonOptions),
+                v => (IReadOnlyList<string>)(JsonSerializer.Deserialize<List<string>>(v, jsonOptions) ?? new List<string>()));
     }
 }
