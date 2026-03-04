@@ -1,7 +1,7 @@
 # RedGraniteCms: React + Redux Toolkit + GraphQL + .Net Boilerplate
 
 ## Description
-RedGraniteCms is a full-stack boilerplate designed to help developers quickly build applications using React, Redux Toolkit, GraphQL, and .Net. It provides a solid foundation for creating scalable and maintainable applications with full CRUD (Create, Read, Update, Delete) functionality, leveraging GraphQL for efficient data operations.
+RedGraniteCms is a simple CMS implementation built on RedGranite, a full-stack boilerplate designed to help developers quickly build applications using React, Redux Toolkit, GraphQL, and .Net. It provides a solid foundation for creating scalable and maintainable applications with full CRUD (Create, Read, Update, Delete) functionality, leveraging GraphQL for efficient data operations.
 
 ## Features
 
