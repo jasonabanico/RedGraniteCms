@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="HotChocolate" Version="13.9.14" />
+	  <PackageReference Include="HotChocolate.AspNetCore" Version="13.9.14" />
+	  <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="13.9.14" />
+	  <PackageReference Include="FluentValidation" Version="11.11.0" />
+	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RedGranite.Server.Core\RedGranite.Server.Core.csproj" />
+    <ProjectReference Include="..\RedGranite.Server.Data\RedGranite.Server.Data.csproj" />
+  </ItemGroup>
+
+</Project>
