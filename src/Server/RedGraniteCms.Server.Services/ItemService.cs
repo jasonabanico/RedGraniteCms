@@ -16,7 +16,7 @@ public class ItemService : IItemService
         _logger = logger;
     }
 
-    public async Task<Item?> GetItemAsync(string id)
+    public async Task<Item?> GetItemAsync(Guid id)
     {
         _logger.LogDebug("Getting item with ID: {ItemId}", id);
         
@@ -25,7 +25,7 @@ public class ItemService : IItemService
         if (item is null)
         {
             _logger.LogWarning("Item not found: {ItemId}", id);
-            throw new NotFoundException(nameof(Item), id);
+            throw new NotFoundException(nameof(Item), id.ToString());
         }
         
         return item;
@@ -43,7 +43,7 @@ public class ItemService : IItemService
 
     public async Task<Item?> AddItemAsync(Item item)
     {
-        _logger.LogInformation("Adding new item: {ItemName}", item.Name);
+        _logger.LogInformation("Adding new item: {ItemTitle}", item.Title);
         
         var result = await _repository.AddItemAsync(item);
         
@@ -51,7 +51,7 @@ public class ItemService : IItemService
         return result;
     }
 
-    public async Task<Item?> UpdateItemAsync(string id, Item item)
+    public async Task<Item?> UpdateItemAsync(Guid id, Item item)
     {
         _logger.LogInformation("Updating item: {ItemId}", id);
         
@@ -60,7 +60,7 @@ public class ItemService : IItemService
         if (existingItem is null)
         {
             _logger.LogWarning("Cannot update - item not found: {ItemId}", id);
-            throw new NotFoundException(nameof(Item), id);
+            throw new NotFoundException(nameof(Item), id.ToString());
         }
         
         var result = await _repository.UpdateItemAsync(id, item);
@@ -69,7 +69,7 @@ public class ItemService : IItemService
         return result;
     }
 
-    public async Task DeleteItemAsync(string id)
+    public async Task DeleteItemAsync(Guid id)
     {
         _logger.LogInformation("Deleting item: {ItemId}", id);
         
@@ -78,7 +78,7 @@ public class ItemService : IItemService
         if (existingItem is null)
         {
             _logger.LogWarning("Cannot delete - item not found: {ItemId}", id);
-            throw new NotFoundException(nameof(Item), id);
+            throw new NotFoundException(nameof(Item), id.ToString());
         }
         
         await _repository.DeleteItemAsync(id);

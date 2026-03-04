@@ -43,7 +43,7 @@ public class ItemQueryIntegrationTests
     {
         // Arrange
         var repository = new InMemoryItemRepository();
-        var item = Item.Create("Test Item", "Short Desc", "Long Description");
+        var item = Item.Create(ownerId: "user-1", contentType: "blog-post", title: "Test Item", summary: "Short Desc", content: "Long Description");
         await repository.AddItemAsync(item);
 
         var executor = await CreateExecutorAsync(repository);
@@ -53,9 +53,9 @@ public class ItemQueryIntegrationTests
             query {{
                 GetItem(id: ""{item.Id}"") {{
                     id
-                    name
-                    shortDescription
-                    longDescription
+                    title
+                    summary
+                    content
                 }}
             }}
         ");
@@ -72,15 +72,16 @@ public class ItemQueryIntegrationTests
     {
         // Arrange
         var executor = await CreateExecutorAsync(new InMemoryItemRepository());
+        var nonExistentId = Guid.NewGuid();
 
         // Act
-        var result = await executor.ExecuteAsync(@"
-            query {
-                GetItem(id: ""non-existent-id"") {
+        var result = await executor.ExecuteAsync($@"
+            query {{
+                GetItem(id: ""{nonExistentId}"") {{
                     id
-                    name
-                }
-            }
+                    title
+                }}
+            }}
         ");
 
         // Assert
@@ -94,8 +95,8 @@ public class ItemQueryIntegrationTests
     {
         // Arrange
         var repository = new InMemoryItemRepository();
-        await repository.AddItemAsync(Item.Create("Item 1", "Short 1", "Long 1"));
-        await repository.AddItemAsync(Item.Create("Item 2", "Short 2", "Long 2"));
+        await repository.AddItemAsync(Item.Create(ownerId: "user-1", contentType: "blog-post", title: "Item 1", summary: "Short 1", content: "Long 1"));
+        await repository.AddItemAsync(Item.Create(ownerId: "user-1", contentType: "blog-post", title: "Item 2", summary: "Short 2", content: "Long 2"));
 
         var executor = await CreateExecutorAsync(repository);
 
@@ -104,7 +105,7 @@ public class ItemQueryIntegrationTests
             query {
                 GetItems(count: 10) {
                     id
-                    name
+                    title
                 }
             }
         ");
@@ -124,7 +125,7 @@ public class InMemoryItemRepository : IItemRepository
 {
     private readonly List<Item> _items = new();
 
-    public Task<Item?> GetItemAsync(string id)
+    public Task<Item?> GetItemAsync(Guid id)
     {
         var item = _items.FirstOrDefault(i => i.Id == id);
         return Task.FromResult(item);
@@ -136,8 +137,8 @@ public class InMemoryItemRepository : IItemRepository
         var effectiveCount = count ?? 50;
 
         var items = _items
-            .Where(i => i.LastModified < effectiveMaxDate)
-            .OrderByDescending(i => i.LastModified)
+            .Where(i => i.LastModifiedAt < effectiveMaxDate)
+            .OrderByDescending(i => i.LastModifiedAt)
             .Take(effectiveCount)
             .ToList();
 
@@ -150,17 +151,30 @@ public class InMemoryItemRepository : IItemRepository
         return Task.FromResult<Item?>(item);
     }
 
-    public Task<Item?> UpdateItemAsync(string id, Item item)
+    public Task<Item?> UpdateItemAsync(Guid id, Item item)
     {
         var existingItem = _items.FirstOrDefault(i => i.Id == id);
         if (existingItem != null)
         {
-            existingItem.Update(item.Name, item.ShortDescription, item.LongDescription);
+            existingItem.Update(
+                title: item.Title,
+                summary: item.Summary,
+                content: item.Content,
+                status: item.Status,
+                visibility: item.Visibility,
+                language: item.Language,
+                slug: item.Slug,
+                contentType: item.ContentType,
+                parentId: item.ParentId,
+                ancestorIds: item.AncestorIds,
+                sortOrder: item.SortOrder,
+                metadata: item.Metadata,
+                tags: item.Tags);
         }
         return Task.FromResult(existingItem);
     }
 
-    public Task DeleteItemAsync(string id)
+    public Task DeleteItemAsync(Guid id)
     {
         var item = _items.FirstOrDefault(i => i.Id == id);
         if (item != null)

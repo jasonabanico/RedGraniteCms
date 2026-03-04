@@ -1,4 +1,5 @@
 using RedGraniteCms.Server.Core.Models;
+using System.Text.Json.Nodes;
 
 namespace RedGraniteCms.Server.Core.Tests.Models;
 
@@ -7,109 +8,239 @@ public class ItemTests
     [Fact]
     public void Create_WithValidInputs_ReturnsItem()
     {
-        // Arrange
-        var name = "Test Item";
-        var shortDescription = "Short description";
-        var longDescription = "Long description for the test item";
-
-        // Act
-        var item = Item.Create(name, shortDescription, longDescription);
+        // Arrange & Act
+        var item = Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: "Test Item",
+            summary: "Short summary",
+            content: "Full content body"
+        );
 
         // Assert
         item.Should().NotBeNull();
-        item.Name.Should().Be(name);
-        item.ShortDescription.Should().Be(shortDescription);
-        item.LongDescription.Should().Be(longDescription);
-        item.Id.Should().NotBeNullOrEmpty();
-        item.Created.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
-        item.LastModified.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
+        item.Title.Should().Be("Test Item");
+        item.Summary.Should().Be("Short summary");
+        item.Content.Should().Be("Full content body");
+        item.OwnerId.Should().Be("user-1");
+        item.ContentType.Should().Be("blog-post");
+        item.Id.Should().NotBe(Guid.Empty);
+        item.CreatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
+        item.LastModifiedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
+        item.Status.Should().Be(ItemStatus.Draft);
+        item.Visibility.Should().Be(ItemVisibility.Private);
+        item.Language.Should().Be("en");
+    }
+
+    [Fact]
+    public void Create_WithAllOptions_SetsAllProperties()
+    {
+        // Arrange
+        var metadata = new JsonObject { ["hero"] = "https://example.com/hero.jpg" };
+        var tags = new[] { "tech", "news" };
+
+        // Act
+        var item = Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: "Full Item",
+            summary: "Summary",
+            content: "Content",
+            status: ItemStatus.Published,
+            visibility: ItemVisibility.Public,
+            language: "fr",
+            slug: "full-item",
+            parentId: "parent-1",
+            ancestorIds: new[] { "root", "parent-1" },
+            sortOrder: 5,
+            metadata: metadata,
+            tags: tags,
+            createdBy: "admin"
+        );
+
+        // Assert
+        item.Status.Should().Be(ItemStatus.Published);
+        item.Visibility.Should().Be(ItemVisibility.Public);
+        item.Language.Should().Be("fr");
+        item.Slug.Should().Be("full-item");
+        item.ParentId.Should().Be("parent-1");
+        item.AncestorIds.Should().BeEquivalentTo(new[] { "root", "parent-1" });
+        item.SortOrder.Should().Be(5);
+        item.Tags.Should().Contain("tech").And.Contain("news");
+        item.CreatedBy.Should().Be("admin");
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithInvalidName_ThrowsArgumentException(string? invalidName)
+    public void Create_WithInvalidOwnerId_ThrowsArgumentException(string? invalidOwnerId)
     {
-        // Arrange
-        var shortDescription = "Short description";
-        var longDescription = "Long description";
+        var act = () => Item.Create(
+            ownerId: invalidOwnerId!,
+            contentType: "blog-post",
+            title: "Test");
 
-        // Act
-        var act = () => Item.Create(invalidName!, shortDescription, longDescription);
-
-        // Assert
         act.Should().Throw<ArgumentException>()
-            .WithParameterName("name");
+            .WithParameterName("ownerId");
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithInvalidShortDescription_ThrowsArgumentException(string? invalidShortDescription)
+    public void Create_WithInvalidContentType_ThrowsArgumentException(string? invalidContentType)
     {
-        // Arrange
-        var name = "Test Item";
-        var longDescription = "Long description";
+        var act = () => Item.Create(
+            ownerId: "user-1",
+            contentType: invalidContentType!,
+            title: "Test");
 
-        // Act
-        var act = () => Item.Create(name, invalidShortDescription!, longDescription);
-
-        // Assert
         act.Should().Throw<ArgumentException>()
-            .WithParameterName("shortDescription");
+            .WithParameterName("contentType");
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithInvalidLongDescription_ThrowsArgumentException(string? invalidLongDescription)
+    public void Create_WithInvalidTitle_ThrowsArgumentException(string? invalidTitle)
     {
-        // Arrange
-        var name = "Test Item";
-        var shortDescription = "Short description";
+        var act = () => Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: invalidTitle!);
 
-        // Act
-        var act = () => Item.Create(name, shortDescription, invalidLongDescription!);
-
-        // Assert
         act.Should().Throw<ArgumentException>()
-            .WithParameterName("longDescription");
+            .WithParameterName("title");
+    }
+
+    [Fact]
+    public void Create_WithInvalidSlug_ThrowsArgumentException()
+    {
+        var act = () => Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: "Test",
+            slug: "Invalid Slug!");
+
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("slug");
     }
 
     [Fact]
     public void Update_WithValidInputs_UpdatesItem()
     {
         // Arrange
-        var item = Item.Create("Original Name", "Original Short", "Original Long");
-        var originalLastModified = item.LastModified;
-        
-        // Wait briefly to ensure LastModified changes
+        var item = Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: "Original Title");
+        var originalLastModified = item.LastModifiedAt;
+
+        // Wait briefly to ensure LastModifiedAt changes
         Thread.Sleep(10);
 
         // Act
-        item.Update("Updated Name", "Updated Short", "Updated Long");
+        item.Update(
+            title: "Updated Title",
+            summary: "Updated Summary",
+            content: "Updated Content");
 
         // Assert
-        item.Name.Should().Be("Updated Name");
-        item.ShortDescription.Should().Be("Updated Short");
-        item.LongDescription.Should().Be("Updated Long");
-        item.LastModified.Should().BeAfter(originalLastModified);
+        item.Title.Should().Be("Updated Title");
+        item.Summary.Should().Be("Updated Summary");
+        item.Content.Should().Be("Updated Content");
+        item.LastModifiedAt.Should().BeAfter(originalLastModified);
     }
 
     [Fact]
-    public void Update_WithInvalidName_ThrowsArgumentException()
+    public void Update_WithInvalidTitle_ThrowsArgumentException()
+    {
+        var item = Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: "Original Title");
+
+        var act = () => item.Update(title: "");
+
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("title");
+    }
+
+    [Fact]
+    public void Publish_SetsStatusAndPublishedAt()
     {
         // Arrange
-        var item = Item.Create("Original Name", "Original Short", "Original Long");
+        var item = Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: "Draft Post");
 
         // Act
-        var act = () => item.Update("", "Updated Short", "Updated Long");
+        item.Publish("editor");
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithParameterName("name");
+        item.Status.Should().Be(ItemStatus.Published);
+        item.PublishedAt.Should().NotBeNull();
+        item.PublishedBy.Should().Be("editor");
+    }
+
+    [Fact]
+    public void Archive_SetsStatusToArchived()
+    {
+        // Arrange
+        var item = Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: "Post",
+            status: ItemStatus.Published);
+
+        // Act
+        item.Archive("admin");
+
+        // Assert
+        item.Status.Should().Be(ItemStatus.Archived);
+    }
+
+    [Fact]
+    public void AddTag_AddsNewTag()
+    {
+        var item = Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: "Post");
+
+        item.AddTag("tech");
+
+        item.Tags.Should().Contain("tech");
+    }
+
+    [Fact]
+    public void RemoveTag_RemovesExistingTag()
+    {
+        var item = Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: "Post",
+            tags: new[] { "tech", "news" });
+
+        item.RemoveTag("tech");
+
+        item.Tags.Should().NotContain("tech");
+        item.Tags.Should().Contain("news");
+    }
+
+    [Fact]
+    public void SetMetadata_SetsAndGetsMetadataValues()
+    {
+        var item = Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: "Post");
+
+        item.SetMetadata("hero", JsonValue.Create("https://example.com/hero.jpg"));
+
+        item.GetMetadataString("hero").Should().Be("https://example.com/hero.jpg");
     }
 }

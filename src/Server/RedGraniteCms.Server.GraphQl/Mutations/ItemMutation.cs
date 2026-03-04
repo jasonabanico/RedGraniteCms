@@ -5,6 +5,7 @@ using RedGraniteCms.Server.Core.Interfaces;
 using RedGraniteCms.Server.Core.Models;
 using RedGraniteCms.Server.GraphQl.Types;
 using RedGraniteCms.Server.GraphQl.Validators;
+using System.Text.Json.Nodes;
 using ValidationException = RedGraniteCms.Server.Core.Exceptions.ValidationException;
 
 namespace RedGraniteCms.Server.GraphQl.Mutations;
@@ -27,7 +28,7 @@ public class ItemMutation
     [GraphQLName("AddItem")]
     public async Task<Item?> AddItemAsync(ItemInput item, [Service] IItemService itemService)
     {
-        _logger.LogDebug("AddItem mutation called for: {ItemName}", item.Name);
+        _logger.LogDebug("AddItem mutation called for: {ItemTitle}", item.Title);
 
         // Validate input
         var validator = new ItemInputValidator();
@@ -41,7 +42,27 @@ public class ItemMutation
             throw new ValidationException(errors);
         }
 
-        var newItem = Item.Create(item.Name, item.ShortDescription, item.LongDescription);
+        var status = Enum.TryParse<ItemStatus>(item.Status, true, out var s) ? s : ItemStatus.Draft;
+        var visibility = Enum.TryParse<ItemVisibility>(item.Visibility, true, out var v) ? v : ItemVisibility.Private;
+        JsonObject? metadata = item.MetadataJson is not null ? JsonNode.Parse(item.MetadataJson)?.AsObject() : null;
+
+        var newItem = Item.Create(
+            ownerId: item.OwnerId,
+            contentType: item.ContentType,
+            title: item.Title,
+            summary: item.Summary,
+            content: item.Content,
+            status: status,
+            visibility: visibility,
+            language: item.Language ?? "en",
+            slug: item.Slug,
+            parentId: item.ParentId,
+            ancestorIds: item.AncestorIds,
+            sortOrder: item.SortOrder ?? 0,
+            metadata: metadata,
+            tags: item.Tags
+        );
+
         return await itemService.AddItemAsync(newItem);
     }
 
@@ -63,8 +84,28 @@ public class ItemMutation
             throw new ValidationException(errors);
         }
 
-        var updatedItem = Item.Create(item.Name, item.ShortDescription, item.LongDescription);
-        return await itemService.UpdateItemAsync(item.Id, updatedItem);
+        var status = Enum.TryParse<ItemStatus>(item.Status, true, out var s) ? s : ItemStatus.Draft;
+        var visibility = Enum.TryParse<ItemVisibility>(item.Visibility, true, out var v) ? v : ItemVisibility.Private;
+        JsonObject? metadata = item.MetadataJson is not null ? JsonNode.Parse(item.MetadataJson)?.AsObject() : null;
+
+        var updatedItem = Item.Create(
+            ownerId: item.OwnerId,
+            contentType: item.ContentType,
+            title: item.Title,
+            summary: item.Summary,
+            content: item.Content,
+            status: status,
+            visibility: visibility,
+            language: item.Language ?? "en",
+            slug: item.Slug,
+            parentId: item.ParentId,
+            ancestorIds: item.AncestorIds,
+            sortOrder: item.SortOrder ?? 0,
+            metadata: metadata,
+            tags: item.Tags
+        );
+
+        return await itemService.UpdateItemAsync(Guid.Parse(item.Id!), updatedItem);
     }
 
     [UseServiceScope]
@@ -78,7 +119,7 @@ public class ItemMutation
             throw new ValidationException("id", "Item ID is required.");
         }
 
-        await itemService.DeleteItemAsync(id);
+        await itemService.DeleteItemAsync(Guid.Parse(id));
         return true;
     }
 }

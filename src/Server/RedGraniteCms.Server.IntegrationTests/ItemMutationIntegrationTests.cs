@@ -33,10 +33,11 @@ public class ItemMutationIntegrationTests
         var (service, repository) = CreateServices();
         var input = new ItemInput
         {
-            Id = "",
-            Name = "New Item",
-            ShortDescription = "Short Description",
-            LongDescription = "This is a long description for the new item"
+            OwnerId = "user-1",
+            ContentType = "blog-post",
+            Title = "New Item",
+            Summary = "Short Description",
+            Content = "This is a long description for the new item"
         };
 
         // Validate input
@@ -45,30 +46,36 @@ public class ItemMutationIntegrationTests
         validationResult.IsValid.Should().BeTrue();
 
         // Act
-        var newItem = Item.Create(input.Name, input.ShortDescription, input.LongDescription);
+        var newItem = Item.Create(
+            ownerId: input.OwnerId,
+            contentType: input.ContentType,
+            title: input.Title,
+            summary: input.Summary,
+            content: input.Content);
         var result = await service.AddItemAsync(newItem);
 
         // Assert
         result.Should().NotBeNull();
-        result!.Name.Should().Be("New Item");
-        result.ShortDescription.Should().Be("Short Description");
+        result!.Title.Should().Be("New Item");
+        result.Summary.Should().Be("Short Description");
 
         // Verify item was added to repository
         var items = await repository.GetItemsAsync(null, 10);
         items.Should().HaveCount(1);
-        items[0].Name.Should().Be("New Item");
+        items[0].Title.Should().Be("New Item");
     }
 
     [Fact]
-    public async Task AddItem_WithEmptyName_FailsValidation()
+    public async Task AddItem_WithEmptyTitle_FailsValidation()
     {
         // Arrange
         var input = new ItemInput
         {
-            Id = "",
-            Name = "",
-            ShortDescription = "Short",
-            LongDescription = "Long"
+            OwnerId = "user-1",
+            ContentType = "blog-post",
+            Title = "",
+            Summary = "Short",
+            Content = "Long"
         };
 
         // Act
@@ -77,7 +84,7 @@ public class ItemMutationIntegrationTests
 
         // Assert
         validationResult.IsValid.Should().BeFalse();
-        validationResult.Errors.Should().Contain(e => e.PropertyName == "Name");
+        validationResult.Errors.Should().Contain(e => e.PropertyName == "Title");
     }
 
     [Fact]
@@ -85,15 +92,22 @@ public class ItemMutationIntegrationTests
     {
         // Arrange
         var (service, repository) = CreateServices();
-        var item = Item.Create("Original Name", "Original Short", "Original Long");
+        var item = Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: "Original Name",
+            summary: "Original Short",
+            content: "Original Long");
         await repository.AddItemAsync(item);
 
         var input = new ItemInput
         {
-            Id = item.Id,
-            Name = "Updated Name",
-            ShortDescription = "Updated Short",
-            LongDescription = "Updated Long Description"
+            Id = item.Id.ToString(),
+            OwnerId = "user-1",
+            ContentType = "blog-post",
+            Title = "Updated Name",
+            Summary = "Updated Short",
+            Content = "Updated Long Description"
         };
 
         // Validate input
@@ -102,16 +116,21 @@ public class ItemMutationIntegrationTests
         validationResult.IsValid.Should().BeTrue();
 
         // Act
-        var updatedItem = Item.Create(input.Name, input.ShortDescription, input.LongDescription);
+        var updatedItem = Item.Create(
+            ownerId: input.OwnerId,
+            contentType: input.ContentType,
+            title: input.Title,
+            summary: input.Summary,
+            content: input.Content);
         var result = await service.UpdateItemAsync(item.Id, updatedItem);
 
         // Assert
         result.Should().NotBeNull();
-        result!.Name.Should().Be("Updated Name");
+        result!.Title.Should().Be("Updated Name");
 
         // Verify item was updated in repository
         var storedItem = await repository.GetItemAsync(item.Id);
-        storedItem?.Name.Should().Be("Updated Name");
+        storedItem?.Title.Should().Be("Updated Name");
     }
 
     [Fact]
@@ -121,9 +140,11 @@ public class ItemMutationIntegrationTests
         var input = new ItemInput
         {
             Id = "",
-            Name = "Updated Name",
-            ShortDescription = "Updated Short",
-            LongDescription = "Updated Long Description"
+            OwnerId = "user-1",
+            ContentType = "blog-post",
+            Title = "Updated Name",
+            Summary = "Updated Short",
+            Content = "Updated Long Description"
         };
 
         // Act
@@ -140,7 +161,12 @@ public class ItemMutationIntegrationTests
     {
         // Arrange
         var (service, repository) = CreateServices();
-        var item = Item.Create("To Delete", "Short", "Long");
+        var item = Item.Create(
+            ownerId: "user-1",
+            contentType: "blog-post",
+            title: "To Delete",
+            summary: "Short",
+            content: "Long");
         await repository.AddItemAsync(item);
 
         // Verify item exists
@@ -162,7 +188,7 @@ public class ItemMutationIntegrationTests
         var (service, _) = CreateServices();
 
         // Act & Assert
-        var action = () => service.DeleteItemAsync("non-existent-id");
+        var action = () => service.DeleteItemAsync(Guid.NewGuid());
         await action.Should().ThrowAsync<RedGraniteCms.Server.Core.Exceptions.NotFoundException>();
     }
 }

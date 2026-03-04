@@ -24,7 +24,7 @@ public class ItemQuery
     public async Task<Item?> GetItemAsync(string id, [Service] IItemService itemService)
     {
         _logger.LogDebug("GetItem query called for ID: {ItemId}", id);
-        return await itemService.GetItemAsync(id);
+        return await itemService.GetItemAsync(Guid.Parse(id));
     }
 
     [UseServiceScope]

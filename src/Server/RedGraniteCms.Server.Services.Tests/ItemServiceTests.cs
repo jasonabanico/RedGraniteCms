@@ -19,12 +19,15 @@ public class ItemServiceTests
         _service = new ItemService(_mockRepository.Object, _mockLogger.Object);
     }
 
+    private static Item CreateTestItem(string title = "Test", string ownerId = "user-1", string contentType = "blog-post")
+        => Item.Create(ownerId: ownerId, contentType: contentType, title: title);
+
     [Fact]
     public async Task GetItemAsync_WhenItemExists_ReturnsItem()
     {
         // Arrange
-        var itemId = "test-id";
-        var expectedItem = Item.Create("Test", "Short", "Long");
+        var itemId = Guid.NewGuid();
+        var expectedItem = CreateTestItem();
         _mockRepository.Setup(r => r.GetItemAsync(itemId))
             .ReturnsAsync(expectedItem);
 
@@ -41,7 +44,7 @@ public class ItemServiceTests
     public async Task GetItemAsync_WhenItemNotFound_ThrowsNotFoundException()
     {
         // Arrange
-        var itemId = "non-existent-id";
+        var itemId = Guid.NewGuid();
         _mockRepository.Setup(r => r.GetItemAsync(itemId))
             .ReturnsAsync((Item?)null);
 
@@ -50,7 +53,7 @@ public class ItemServiceTests
 
         // Assert
         await act.Should().ThrowAsync<NotFoundException>()
-            .Where(e => e.EntityType == nameof(Item) && e.EntityId == itemId);
+            .Where(e => e.EntityType == nameof(Item) && e.EntityId == itemId.ToString());
     }
 
     [Fact]
@@ -61,8 +64,8 @@ public class ItemServiceTests
         var count = 10;
         var expectedItems = new List<Item>
         {
-            Item.Create("Item 1", "Short 1", "Long 1"),
-            Item.Create("Item 2", "Short 2", "Long 2"),
+            CreateTestItem("Item 1"),
+            CreateTestItem("Item 2"),
         };
         _mockRepository.Setup(r => r.GetItemsAsync(maxDate, count))
             .ReturnsAsync(expectedItems);
@@ -79,7 +82,7 @@ public class ItemServiceTests
     public async Task AddItemAsync_CallsRepository()
     {
         // Arrange
-        var item = Item.Create("New Item", "Short", "Long");
+        var item = CreateTestItem("New Item");
         _mockRepository.Setup(r => r.AddItemAsync(item))
             .ReturnsAsync(item);
 
@@ -95,9 +98,9 @@ public class ItemServiceTests
     public async Task UpdateItemAsync_WhenItemExists_UpdatesItem()
     {
         // Arrange
-        var itemId = "existing-id";
-        var existingItem = Item.Create("Original", "Original Short", "Original Long");
-        var updateItem = Item.Create("Updated", "Updated Short", "Updated Long");
+        var itemId = Guid.NewGuid();
+        var existingItem = CreateTestItem("Original");
+        var updateItem = CreateTestItem("Updated");
         
         _mockRepository.Setup(r => r.GetItemAsync(itemId))
             .ReturnsAsync(existingItem);
@@ -116,8 +119,8 @@ public class ItemServiceTests
     public async Task UpdateItemAsync_WhenItemNotFound_ThrowsNotFoundException()
     {
         // Arrange
-        var itemId = "non-existent-id";
-        var updateItem = Item.Create("Updated", "Updated Short", "Updated Long");
+        var itemId = Guid.NewGuid();
+        var updateItem = CreateTestItem("Updated");
         
         _mockRepository.Setup(r => r.GetItemAsync(itemId))
             .ReturnsAsync((Item?)null);
@@ -127,15 +130,15 @@ public class ItemServiceTests
 
         // Assert
         await act.Should().ThrowAsync<NotFoundException>();
-        _mockRepository.Verify(r => r.UpdateItemAsync(It.IsAny<string>(), It.IsAny<Item>()), Times.Never);
+        _mockRepository.Verify(r => r.UpdateItemAsync(It.IsAny<Guid>(), It.IsAny<Item>()), Times.Never);
     }
 
     [Fact]
     public async Task DeleteItemAsync_WhenItemExists_DeletesItem()
     {
         // Arrange
-        var itemId = "existing-id";
-        var existingItem = Item.Create("Item to Delete", "Short", "Long");
+        var itemId = Guid.NewGuid();
+        var existingItem = CreateTestItem("Item to Delete");
         
         _mockRepository.Setup(r => r.GetItemAsync(itemId))
             .ReturnsAsync(existingItem);
@@ -153,7 +156,7 @@ public class ItemServiceTests
     public async Task DeleteItemAsync_WhenItemNotFound_ThrowsNotFoundException()
     {
         // Arrange
-        var itemId = "non-existent-id";
+        var itemId = Guid.NewGuid();
         
         _mockRepository.Setup(r => r.GetItemAsync(itemId))
             .ReturnsAsync((Item?)null);
@@ -163,6 +166,6 @@ public class ItemServiceTests
 
         // Assert
         await act.Should().ThrowAsync<NotFoundException>();
-        _mockRepository.Verify(r => r.DeleteItemAsync(It.IsAny<string>()), Times.Never);
+        _mockRepository.Verify(r => r.DeleteItemAsync(It.IsAny<Guid>()), Times.Never);
     }
 }
