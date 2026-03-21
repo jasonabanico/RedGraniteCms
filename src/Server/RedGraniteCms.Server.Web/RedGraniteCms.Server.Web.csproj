@@ -8,11 +8,6 @@
     <SpaRoot>..\..\Client\RedGraniteCms.Client.Web\</SpaRoot>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="Services\Pages\" />
-  </ItemGroup>
-
   <Target Name="BuildReactApp" BeforeTargets="Build" Condition="'$(Configuration)' == 'Release'">
     <Message Text="Building React admin app..." Importance="high" />
     <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />

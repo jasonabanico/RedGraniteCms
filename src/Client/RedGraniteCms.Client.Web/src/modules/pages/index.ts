@@ -33,6 +33,8 @@ class PageService {
     async addPage(input: PageInput): Promise<AddPageResult> {
         const response = await this.items.addItem({
             id: '',
+            ownerId: 'admin',
+            contentType: 'page',
             title: input.title,
             slug: input.slug,
             summary: input.summary,
@@ -48,6 +50,8 @@ class PageService {
         }
         const response = await this.items.updateItem({
             id: input.id,
+            ownerId: 'admin',
+            contentType: 'page',
             title: input.title,
             slug: input.slug,
             summary: input.summary,

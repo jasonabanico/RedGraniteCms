@@ -16,6 +16,15 @@ public class Program
             client.BaseAddress = new Uri(apiBaseUrl);
         });
 
+        // Reverse proxy HttpClient for dev SPA proxy
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.AddHttpClient("SpaProxy", client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:3000");
+            });
+        }
+
         // MVC
         builder.Services.AddControllersWithViews();
 
@@ -30,28 +39,78 @@ public class Program
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
-        // Serve React admin app static files
+        // Admin SPA: proxy to Vite in dev, serve static build in production
         var adminPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "admin");
-        if (Directory.Exists(adminPath))
+        if (app.Environment.IsDevelopment())
         {
-            app.UseStaticFiles(new StaticFileOptions
+            // Proxy /admin requests to the Vite dev server
+            app.Map("/admin/{**catch-all}", async (HttpContext context, IHttpClientFactory httpClientFactory) =>
             {
-                FileProvider = new PhysicalFileProvider(adminPath),
-                RequestPath = "/admin"
+                var client = httpClientFactory.CreateClient("SpaProxy");
+
+                // Rewrite path: /admin/foo → /foo (Vite serves from root)
+                var targetPath = context.Request.Path.Value?.Replace("/admin", "") ?? "/";
+                if (string.IsNullOrEmpty(targetPath)) targetPath = "/";
+                var targetUrl = targetPath + context.Request.QueryString;
+
+                var requestMessage = new HttpRequestMessage(new HttpMethod(context.Request.Method), targetUrl);
+
+                // Forward request body for POST etc.
+                if (context.Request.ContentLength > 0 || context.Request.ContentType != null)
+                {
+                    requestMessage.Content = new StreamContent(context.Request.Body);
+                    if (context.Request.ContentType != null)
+                        requestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(context.Request.ContentType);
+                }
+
+                try
+                {
+                    var response = await client.SendAsync(requestMessage);
+                    context.Response.StatusCode = (int)response.StatusCode;
+
+                    foreach (var header in response.Content.Headers)
+                        context.Response.Headers[header.Key] = header.Value.ToArray();
+
+                    // Remove transfer-encoding since we're buffering
+                    context.Response.Headers.Remove("transfer-encoding");
+
+                    await response.Content.CopyToAsync(context.Response.Body);
+                }
+                catch (HttpRequestException)
+                {
+                    // Vite dev server not running — show a helpful message
+                    context.Response.StatusCode = 502;
+                    context.Response.ContentType = "text/html";
+                    await context.Response.WriteAsync(
+                        "<h1>Admin UI Unavailable</h1>" +
+                        "<p>The Vite dev server is not running. Start it with:</p>" +
+                        "<pre>cd src/Client/RedGraniteCms.Client.Web &amp;&amp; npm run dev</pre>");
+                }
+            });
+        }
+        else
+        {
+            // Production: serve pre-built React app from wwwroot/admin
+            if (Directory.Exists(adminPath))
+            {
+                app.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new PhysicalFileProvider(adminPath),
+                    RequestPath = "/admin"
+                });
+            }
+
+            app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments("/admin"), admin =>
+            {
+                admin.UseRouting();
+                admin.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapFallbackToFile("/admin/{**path}", "/admin/index.html");
+                });
             });
         }
 
         app.UseRouting();
-
-        // Map admin routes to React SPA (must be before other routes)
-        app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments("/admin"), admin =>
-        {
-            admin.UseRouting();
-            admin.UseEndpoints(endpoints =>
-            {
-                endpoints.MapFallbackToFile("/admin/{**path}", "/admin/index.html");
-            });
-        });
 
         app.MapControllerRoute(
             name: "page",

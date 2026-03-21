@@ -14,6 +14,7 @@ public static class DataExtensions
             .AddAuthorization()
             .AddErrorFilter<GraphQlErrorFilter>()
             .AddMutationType<ItemMutation>()
-            .AddQueryType<ItemQuery>();
+            .AddQueryType<ItemQuery>()
+            .AddType<Types.ItemType>();
     }
 }

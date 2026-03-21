@@ -5,6 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="public\" />
-    <Folder Include="src\services\pages\" />
+    <Folder Include="src\modules\pages\" />
   </ItemGroup>
 </Project>

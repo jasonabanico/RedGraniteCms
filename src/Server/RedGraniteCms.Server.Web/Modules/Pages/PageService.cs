@@ -39,8 +39,16 @@ public class PageService : IPageService
             variables = new { slug, status = "PUBLISHED", visibility = "PUBLIC" }
         };
 
-        var dto = await ExecuteQueryAsync<ItemResponse>("GetItem", query);
-        return dto is not null ? MapToPage(dto) : null;
+        try
+        {
+            var dto = await ExecuteQueryAsync<ItemResponse>("GetItem", query);
+            return dto is not null ? MapToPage(dto) : null;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogWarning(ex, "API is unavailable while fetching page by slug: {Slug}", slug);
+            return null;
+        }
     }
 
     public async Task<List<Page>> GetPublishedPagesAsync(int count = 50, int skip = 0)
@@ -57,8 +65,16 @@ public class PageService : IPageService
             variables = new { status = "PUBLISHED", visibility = "PUBLIC", count, skip }
         };
 
-        var dtos = await ExecuteQueryAsync<List<ItemResponse>>("GetItems", query);
-        return dtos?.Select(MapToPage).ToList() ?? [];
+        try
+        {
+            var dtos = await ExecuteQueryAsync<List<ItemResponse>>("GetItems", query);
+            return dtos?.Select(MapToPage).ToList() ?? [];
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogWarning(ex, "API is unavailable while fetching published pages");
+            return [];
+        }
     }
 
     private static Page MapToPage(ItemResponse item)
@@ -95,7 +111,7 @@ public class PageService : IPageService
         if (!response.IsSuccessStatusCode)
         {
             _logger.LogError("GraphQL request failed with status {StatusCode}: {Body}", response.StatusCode, responseBody);
-            throw new InvalidOperationException($"API request failed: {response.StatusCode}");
+            return default;
         }
 
         var document = JsonDocument.Parse(responseBody);
@@ -114,7 +130,7 @@ public class PageService : IPageService
             if (code == "NOT_FOUND")
                 return default;
 
-            throw new InvalidOperationException($"GraphQL error: {firstError}");
+            return default;
         }
 
         if (root.TryGetProperty("data", out var data)
