@@ -8,13 +8,13 @@
     <SpaRoot>..\..\Client\RedGraniteCms.Client.Web\</SpaRoot>
   </PropertyGroup>
 
-  <Target Name="BuildReactApp" BeforeTargets="Build" Condition="'$(Configuration)' == 'Release'">
+  <Target Name="BuildReactApp" BeforeTargets="Build" Condition="!Exists('$(SpaRoot)build\index.html') Or '$(Configuration)' == 'Release'">
     <Message Text="Building React admin app..." Importance="high" />
     <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
     <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
   </Target>
 
-  <Target Name="CopyReactApp" AfterTargets="BuildReactApp" Condition="'$(Configuration)' == 'Release'">
+  <Target Name="CopyReactApp" AfterTargets="BuildReactApp" Condition="!Exists('$(ProjectDir)wwwroot\admin\index.html') Or '$(Configuration)' == 'Release'">
     <Message Text="Copying React admin app to wwwroot/admin..." Importance="high" />
     <ItemGroup>
       <ReactFiles Include="$(SpaRoot)build\**\*.*" />

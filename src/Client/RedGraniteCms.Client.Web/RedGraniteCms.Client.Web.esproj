@@ -2,6 +2,7 @@
   <PropertyGroup>
     <StartupCommand>npm run dev</StartupCommand>
     <JavaScriptTestFramework>Vitest</JavaScriptTestFramework>
+    <ShouldRunBuildScript>false</ShouldRunBuildScript>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="public\" />

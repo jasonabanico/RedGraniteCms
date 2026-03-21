@@ -11,7 +11,7 @@
     @foreach (var p in Model.Pages)
     {
         <li>
-            <a href="/@p.Slug">@p.Title</a>
+            <a href="/pages/@p.Slug">@p.Title</a>
             @if (!string.IsNullOrEmpty(p.Summary))
             {
                 <p>@p.Summary</p>

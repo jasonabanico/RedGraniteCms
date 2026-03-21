@@ -15,7 +15,7 @@ public class PageController : Controller
         _pageService = pageService;
     }
 
-    [Route("{slug}")]
+    [Route("pages/{slug}")]
     public async Task<IActionResult> Index(string slug)
     {
         var page = await _pageService.GetPageBySlugAsync(slug);

@@ -5,7 +5,7 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  base: mode === 'production' ? '/admin/' : '/',
+  base: '/admin/',
   server: {
     port: 3000,
     open: true,
