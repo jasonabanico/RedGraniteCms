@@ -116,6 +116,36 @@ public class ItemQueryIntegrationTests
         data.Should().Contain("Item 1");
         data.Should().Contain("Item 2");
     }
+
+    [Fact]
+    public async Task GetItems_WithStatusFilter_ReturnsFilteredItems()
+    {
+        // Arrange
+        var repository = new InMemoryItemRepository();
+        var published = Item.Create(ownerId: "user-1", contentType: "blog-post", title: "Published Item",
+            status: ItemStatus.Published, visibility: ItemVisibility.Public);
+        var draft = Item.Create(ownerId: "user-1", contentType: "blog-post", title: "Draft Item");
+        await repository.AddItemAsync(published);
+        await repository.AddItemAsync(draft);
+
+        var executor = await CreateExecutorAsync(repository);
+
+        // Act
+        var result = await executor.ExecuteAsync(@"
+            query {
+                GetItems(status: PUBLISHED, visibility: PUBLIC, count: 10) {
+                    id
+                    title
+                }
+            }
+        ");
+
+        // Assert
+        result.ExpectQueryResult();
+        var data = result.ToJson();
+        data.Should().Contain("Published Item");
+        data.Should().NotContain("Draft Item");
+    }
 }
 
 /// <summary>
@@ -125,48 +155,54 @@ public class InMemoryItemRepository : IItemRepository
 {
     private readonly List<Item> _items = new();
 
-    public Task<Item?> GetItemAsync(Guid id)
+    public Task<Item?> GetItemAsync(Guid? id = null, string? slug = null, ItemStatus? status = null, ItemVisibility? visibility = null)
     {
-        var item = _items.FirstOrDefault(i => i.Id == id);
-        return Task.FromResult(item);
+        var query = _items.AsEnumerable();
+
+        if (id.HasValue)
+            query = query.Where(i => i.Id == id.Value);
+
+        if (slug is not null)
+            query = query.Where(i => i.Slug == slug);
+
+        if (status.HasValue)
+            query = query.Where(i => i.Status == status.Value);
+
+        if (visibility.HasValue)
+            query = query.Where(i => i.Visibility == visibility.Value);
+
+        return Task.FromResult(query.FirstOrDefault());
     }
 
-    public Task<Item?> GetItemBySlugAsync(string slug)
-    {
-        var item = _items.FirstOrDefault(i =>
-            i.Slug == slug
-            && i.Status == ItemStatus.Published
-            && i.Visibility == ItemVisibility.Public);
-        return Task.FromResult(item);
-    }
-
-    public Task<List<Item>> GetItemsAsync(DateTimeOffset? maxDate, int? count, int skip = 0)
-    {
-        var effectiveMaxDate = maxDate ?? DateTimeOffset.MaxValue;
-        var effectiveCount = count ?? 50;
-
-        var items = _items
-            .Where(i => i.LastModifiedAt < effectiveMaxDate)
-            .OrderByDescending(i => i.LastModifiedAt)
-            .Skip(skip)
-            .Take(effectiveCount)
-            .ToList();
-
-        return Task.FromResult(items);
-    }
-
-    public Task<List<Item>> GetPublishedItemsAsync(int? count, int skip = 0)
+    public Task<List<Item>> GetItemsAsync(ItemStatus? status = null, ItemVisibility? visibility = null, string? contentType = null, DateTimeOffset? maxDate = null, int? count = null, int skip = 0)
     {
         var effectiveCount = count ?? 50;
+        var query = _items.AsEnumerable();
 
-        var items = _items
-            .Where(i => i.Status == ItemStatus.Published
-                     && i.Visibility == ItemVisibility.Public)
-            .OrderBy(i => i.SortOrder)
-            .ThenByDescending(i => i.PublishedAt)
-            .Skip(skip)
-            .Take(effectiveCount)
-            .ToList();
+        if (status.HasValue)
+            query = query.Where(i => i.Status == status.Value);
+
+        if (visibility.HasValue)
+            query = query.Where(i => i.Visibility == visibility.Value);
+
+        if (contentType is not null)
+            query = query.Where(i => i.ContentType == contentType);
+
+        if (maxDate.HasValue)
+            query = query.Where(i => i.LastModifiedAt < maxDate.Value);
+
+        if (status == ItemStatus.Published)
+        {
+            query = query
+                .OrderBy(i => i.SortOrder)
+                .ThenByDescending(i => i.PublishedAt);
+        }
+        else
+        {
+            query = query.OrderByDescending(i => i.LastModifiedAt);
+        }
+
+        var items = query.Skip(skip).Take(effectiveCount).ToList();
 
         return Task.FromResult(items);
     }

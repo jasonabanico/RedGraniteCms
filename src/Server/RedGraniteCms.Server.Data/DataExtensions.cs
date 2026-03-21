@@ -21,7 +21,7 @@ public static class DataExtensions
             if (environment.IsDevelopment())
             {
                 var sqliteConnection = configuration.GetConnectionString("DefaultConnection")
-                    ?? "Data Source=RedGraniteCms.db";
+                    ?? "Data Source=../RedGraniteCms.db";
                 options.UseSqlite(sqliteConnection);
             }
             else

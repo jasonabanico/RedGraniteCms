@@ -16,26 +16,28 @@ public class ItemRepository : IItemRepository
         _logger = logger;
     }
 
-    public async Task<Item?> GetItemAsync(Guid id)
+    public async Task<Item?> GetItemAsync(Guid? id = null, string? slug = null, ItemStatus? status = null, ItemVisibility? visibility = null)
     {
-        _logger.LogDebug("Querying item with ID: {ItemId}", id);
-        return await _dbContext.Items
-            .AsNoTracking()
-            .FirstOrDefaultAsync(item => item.Id == id);
+        _logger.LogDebug("Querying item with id: {Id}, slug: {Slug}, status: {Status}, visibility: {Visibility}", id, slug, status, visibility);
+
+        var query = _dbContext.Items.AsNoTracking().AsQueryable();
+
+        if (id.HasValue)
+            query = query.Where(i => i.Id == id.Value);
+
+        if (slug is not null)
+            query = query.Where(i => i.Slug == slug);
+
+        if (status.HasValue)
+            query = query.Where(i => i.Status == status.Value);
+
+        if (visibility.HasValue)
+            query = query.Where(i => i.Visibility == visibility.Value);
+
+        return await query.FirstOrDefaultAsync();
     }
 
-    public async Task<Item?> GetItemBySlugAsync(string slug)
-    {
-        _logger.LogDebug("Querying item with slug: {Slug}", slug);
-        return await _dbContext.Items
-            .AsNoTracking()
-            .FirstOrDefaultAsync(item =>
-                item.Slug == slug
-                && item.Status == ItemStatus.Published
-                && item.Visibility == ItemVisibility.Public);
-    }
-
-    public async Task<List<Item>> GetItemsAsync(DateTimeOffset? maxDate, int? count, int skip = 0)
+    public async Task<List<Item>> GetItemsAsync(ItemStatus? status = null, ItemVisibility? visibility = null, string? contentType = null, DateTimeOffset? maxDate = null, int? count = null, int skip = 0)
     {
         const int maxAllowedCount = 500;
         const int defaultCount = 50;
@@ -46,42 +48,43 @@ public class ItemRepository : IItemRepository
             throw new ArgumentException($"Item limit is {maxAllowedCount}", nameof(count));
         }
 
-        var effectiveMaxDate = maxDate ?? new DateTimeOffset(2999, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var effectiveCount = count ?? defaultCount;
 
-        _logger.LogDebug("Querying items with maxDate: {MaxDate}, count: {Count}, skip: {Skip}", effectiveMaxDate, effectiveCount, skip);
+        _logger.LogDebug("Querying items with status: {Status}, visibility: {Visibility}, contentType: {ContentType}, maxDate: {MaxDate}, count: {Count}, skip: {Skip}",
+            status, visibility, contentType, maxDate, effectiveCount, skip);
 
-        // Filter in database rather than loading all items into memory
-        var items = await _dbContext.Items
-            .AsNoTracking()
-            .Where(i => i.LastModifiedAt < effectiveMaxDate)
-            .OrderByDescending(e => e.LastModifiedAt)
+        var query = _dbContext.Items.AsNoTracking().AsQueryable();
+
+        if (status.HasValue)
+            query = query.Where(i => i.Status == status.Value);
+
+        if (visibility.HasValue)
+            query = query.Where(i => i.Visibility == visibility.Value);
+
+        if (contentType is not null)
+            query = query.Where(i => i.ContentType == contentType);
+
+        if (maxDate.HasValue)
+            query = query.Where(i => i.LastModifiedAt < maxDate.Value);
+
+        // Published items sort by sort order then publish date; otherwise by last modified
+        if (status == ItemStatus.Published)
+        {
+            query = query
+                .OrderBy(i => i.SortOrder)
+                .ThenByDescending(i => i.PublishedAt);
+        }
+        else
+        {
+            query = query.OrderByDescending(i => i.LastModifiedAt);
+        }
+
+        var items = await query
             .Skip(skip)
             .Take(effectiveCount)
             .ToListAsync();
 
         _logger.LogDebug("Retrieved {Count} items from database", items.Count);
-        return items;
-    }
-
-    public async Task<List<Item>> GetPublishedItemsAsync(int? count, int skip = 0)
-    {
-        const int defaultCount = 50;
-        var effectiveCount = count ?? defaultCount;
-
-        _logger.LogDebug("Querying published items with count: {Count}, skip: {Skip}", effectiveCount, skip);
-
-        var items = await _dbContext.Items
-            .AsNoTracking()
-            .Where(i => i.Status == ItemStatus.Published
-                     && i.Visibility == ItemVisibility.Public)
-            .OrderBy(i => i.SortOrder)
-            .ThenByDescending(i => i.PublishedAt)
-            .Skip(skip)
-            .Take(effectiveCount)
-            .ToListAsync();
-
-        _logger.LogDebug("Retrieved {Count} published items from database", items.Count);
         return items;
     }
 

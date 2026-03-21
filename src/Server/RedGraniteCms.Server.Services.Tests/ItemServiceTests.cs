@@ -23,33 +23,33 @@ public class ItemServiceTests
         => Item.Create(ownerId: ownerId, contentType: contentType, title: title);
 
     [Fact]
-    public async Task GetItemAsync_WhenItemExists_ReturnsItem()
+    public async Task GetItemAsync_ById_WhenItemExists_ReturnsItem()
     {
         // Arrange
         var itemId = Guid.NewGuid();
         var expectedItem = CreateTestItem();
-        _mockRepository.Setup(r => r.GetItemAsync(itemId))
+        _mockRepository.Setup(r => r.GetItemAsync(itemId, null, null, null))
             .ReturnsAsync(expectedItem);
 
         // Act
-        var result = await _service.GetItemAsync(itemId);
+        var result = await _service.GetItemAsync(id: itemId);
 
         // Assert
         result.Should().NotBeNull();
         result.Should().Be(expectedItem);
-        _mockRepository.Verify(r => r.GetItemAsync(itemId), Times.Once);
+        _mockRepository.Verify(r => r.GetItemAsync(itemId, null, null, null), Times.Once);
     }
 
     [Fact]
-    public async Task GetItemAsync_WhenItemNotFound_ThrowsNotFoundException()
+    public async Task GetItemAsync_ById_WhenItemNotFound_ThrowsNotFoundException()
     {
         // Arrange
         var itemId = Guid.NewGuid();
-        _mockRepository.Setup(r => r.GetItemAsync(itemId))
+        _mockRepository.Setup(r => r.GetItemAsync(itemId, null, null, null))
             .ReturnsAsync((Item?)null);
 
         // Act
-        var act = async () => await _service.GetItemAsync(itemId);
+        var act = async () => await _service.GetItemAsync(id: itemId);
 
         // Assert
         await act.Should().ThrowAsync<NotFoundException>()
@@ -57,37 +57,15 @@ public class ItemServiceTests
     }
 
     [Fact]
-    public async Task GetItemsAsync_ReturnsItemsFromRepository()
-    {
-        // Arrange
-        var maxDate = DateTimeOffset.UtcNow;
-        var count = 10;
-        var expectedItems = new List<Item>
-        {
-            CreateTestItem("Item 1"),
-            CreateTestItem("Item 2"),
-        };
-        _mockRepository.Setup(r => r.GetItemsAsync(maxDate, count, 0))
-            .ReturnsAsync(expectedItems);
-
-        // Act
-        var result = await _service.GetItemsAsync(maxDate, count);
-
-        // Assert
-        result.Should().HaveCount(2);
-        result.Should().BeEquivalentTo(expectedItems);
-    }
-
-    [Fact]
-    public async Task GetItemBySlugAsync_WhenItemExists_ReturnsItem()
+    public async Task GetItemAsync_BySlugWithFilters_WhenItemExists_ReturnsItem()
     {
         // Arrange
         var expectedItem = CreateTestItem("Slug Item");
-        _mockRepository.Setup(r => r.GetItemBySlugAsync("test-slug"))
+        _mockRepository.Setup(r => r.GetItemAsync(null, "test-slug", ItemStatus.Published, ItemVisibility.Public))
             .ReturnsAsync(expectedItem);
 
         // Act
-        var result = await _service.GetItemBySlugAsync("test-slug");
+        var result = await _service.GetItemAsync(slug: "test-slug", status: ItemStatus.Published, visibility: ItemVisibility.Public);
 
         // Assert
         result.Should().NotBeNull();
@@ -95,21 +73,52 @@ public class ItemServiceTests
     }
 
     [Fact]
-    public async Task GetItemBySlugAsync_WhenItemNotFound_ThrowsNotFoundException()
+    public async Task GetItemAsync_BySlug_WhenItemNotFound_ThrowsNotFoundException()
     {
         // Arrange
-        _mockRepository.Setup(r => r.GetItemBySlugAsync("missing-slug"))
+        _mockRepository.Setup(r => r.GetItemAsync(null, "missing-slug", null, null))
             .ReturnsAsync((Item?)null);
 
         // Act
-        var act = async () => await _service.GetItemBySlugAsync("missing-slug");
+        var act = async () => await _service.GetItemAsync(slug: "missing-slug");
 
         // Assert
         await act.Should().ThrowAsync<NotFoundException>();
     }
 
     [Fact]
-    public async Task GetPublishedItemsAsync_ReturnsItemsFromRepository()
+    public async Task GetItemAsync_WithNoIdOrSlug_ThrowsArgumentException()
+    {
+        // Act
+        var act = async () => await _service.GetItemAsync();
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>();
+    }
+
+    [Fact]
+    public async Task GetItemsAsync_ReturnsItemsFromRepository()
+    {
+        // Arrange
+        var maxDate = DateTimeOffset.UtcNow;
+        var expectedItems = new List<Item>
+        {
+            CreateTestItem("Item 1"),
+            CreateTestItem("Item 2"),
+        };
+        _mockRepository.Setup(r => r.GetItemsAsync(null, null, null, maxDate, 10, 0))
+            .ReturnsAsync(expectedItems);
+
+        // Act
+        var result = await _service.GetItemsAsync(maxDate: maxDate, count: 10);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().BeEquivalentTo(expectedItems);
+    }
+
+    [Fact]
+    public async Task GetItemsAsync_WithStatusFilter_ReturnsFilteredItems()
     {
         // Arrange
         var expectedItems = new List<Item>
@@ -117,11 +126,11 @@ public class ItemServiceTests
             CreateTestItem("Published 1"),
             CreateTestItem("Published 2"),
         };
-        _mockRepository.Setup(r => r.GetPublishedItemsAsync(50, 0))
+        _mockRepository.Setup(r => r.GetItemsAsync(ItemStatus.Published, ItemVisibility.Public, null, null, 50, 0))
             .ReturnsAsync(expectedItems);
 
         // Act
-        var result = await _service.GetPublishedItemsAsync(50);
+        var result = await _service.GetItemsAsync(status: ItemStatus.Published, visibility: ItemVisibility.Public, count: 50);
 
         // Assert
         result.Should().HaveCount(2);
@@ -151,8 +160,8 @@ public class ItemServiceTests
         var itemId = Guid.NewGuid();
         var existingItem = CreateTestItem("Original");
         var updateItem = CreateTestItem("Updated");
-        
-        _mockRepository.Setup(r => r.GetItemAsync(itemId))
+
+        _mockRepository.Setup(r => r.GetItemAsync(itemId, null, null, null))
             .ReturnsAsync(existingItem);
         _mockRepository.Setup(r => r.UpdateItemAsync(itemId, updateItem))
             .ReturnsAsync(existingItem);
@@ -171,8 +180,8 @@ public class ItemServiceTests
         // Arrange
         var itemId = Guid.NewGuid();
         var updateItem = CreateTestItem("Updated");
-        
-        _mockRepository.Setup(r => r.GetItemAsync(itemId))
+
+        _mockRepository.Setup(r => r.GetItemAsync(itemId, null, null, null))
             .ReturnsAsync((Item?)null);
 
         // Act
@@ -189,8 +198,8 @@ public class ItemServiceTests
         // Arrange
         var itemId = Guid.NewGuid();
         var existingItem = CreateTestItem("Item to Delete");
-        
-        _mockRepository.Setup(r => r.GetItemAsync(itemId))
+
+        _mockRepository.Setup(r => r.GetItemAsync(itemId, null, null, null))
             .ReturnsAsync(existingItem);
         _mockRepository.Setup(r => r.DeleteItemAsync(itemId))
             .Returns(Task.CompletedTask);
@@ -207,8 +216,8 @@ public class ItemServiceTests
     {
         // Arrange
         var itemId = Guid.NewGuid();
-        
-        _mockRepository.Setup(r => r.GetItemAsync(itemId))
+
+        _mockRepository.Setup(r => r.GetItemAsync(itemId, null, null, null))
             .ReturnsAsync((Item?)null);
 
         // Act

@@ -461,3 +461,8 @@ $RECYCLE.BIN/
 !.vscode/launch.json
 !.vscode/extensions.json
 '+
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal

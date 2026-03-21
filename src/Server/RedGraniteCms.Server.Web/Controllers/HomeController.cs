@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using RedGraniteCms.Server.Core.Interfaces;
+using RedGraniteCms.Server.Web.Modules.Pages;
 using RedGraniteCms.Server.Web.ViewModels;
 
 namespace RedGraniteCms.Server.Web.Controllers;
@@ -9,20 +9,16 @@ namespace RedGraniteCms.Server.Web.Controllers;
 /// </summary>
 public class HomeController : Controller
 {
-    private readonly IItemService _itemService;
+    private readonly IPageModule _pageModule;
 
-    public HomeController(IItemService itemService)
+    public HomeController(IPageModule pageModule)
     {
-        _itemService = itemService;
+        _pageModule = pageModule;
     }
 
     public async Task<IActionResult> Index()
     {
-        var items = await _itemService.GetPublishedItemsAsync(count: 50);
-
-        var pages = items
-            .Select(PageViewModel.FromItem)
-            .ToList();
+        var pages = await _pageModule.GetPublishedPagesAsync(count: 50);
 
         var model = new HomeViewModel
         {

@@ -1,7 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
-using RedGraniteCms.Server.Data;
-using RedGraniteCms.Server.Services;
+using RedGraniteCms.Server.Web.Modules.Pages;
 
 namespace RedGraniteCms.Server.Web;
 
@@ -11,24 +9,17 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Database
-        builder.Services.AddDatabase(builder.Configuration, builder.Environment);
-
-        // Application services
-        builder.Services.AddRepositories();
-        builder.Services.AddServices();
+        // Modules — each module encapsulates API communication for a content type
+        var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5034/";
+        builder.Services.AddHttpClient<IPageModule, PageModule>(client =>
+        {
+            client.BaseAddress = new Uri(apiBaseUrl);
+        });
 
         // MVC
         builder.Services.AddControllersWithViews();
 
         var app = builder.Build();
-
-        // Apply pending migrations at startup
-        using (var scope = app.Services.CreateScope())
-        {
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            await dbContext.Database.MigrateAsync();
-        }
 
         if (!app.Environment.IsDevelopment())
         {

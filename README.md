@@ -9,6 +9,7 @@ RedGraniteCms is a simple CMS implementation built on RedGranite, a full-stack b
 - **Clean Architecture** - Core → Data → Services → GraphQL → API layers
 - **Rich Domain Models** - Factory methods with encapsulated validation
 - **Repository Pattern** - Interface-based dependency injection
+- **Multi-Database Support** - SQLite (default) and PostgreSQL via config
 - **Structured Logging** - `ILogger<T>` throughout all layers
 - **Input Validation** - FluentValidation for GraphQL inputs
 - **Error Handling** - Custom exceptions with HotChocolate `IErrorFilter`
@@ -55,7 +56,9 @@ VITE_GRAPHQL_URL=http://localhost:5034/graphql
 Configure in `appsettings.json`:
 - `AzureAd` - Azure AD authentication settings
 - `Cors:AllowedOrigins` - Allowed CORS origins
-- `ConnectionStrings:CosmosConnection` - CosmosDB connection string
+- `DatabaseProvider` - `Sqlite` (default) or `PostgreSQL`
+- `ConnectionStrings:DefaultConnection` - SQLite connection string
+- `ConnectionStrings:PostgreSQLConnection` - PostgreSQL connection string (when using PostgreSQL)
 
 ## Docs
 - [Setup](https://github.com/jasonabanico/RedGraniteCms/blob/main/docs/setup.md)
@@ -72,7 +75,7 @@ src/
 │   │   ├── Exceptions/                 # Custom exception types
 │   │   ├── Interfaces/                 # Repository & service contracts
 │   │   └── Models/                     # Domain entities
-│   ├── RedGraniteCms.Server.Data/         # EF Core + CosmosDB
+│   ├── RedGraniteCms.Server.Data/         # EF Core + SQLite/PostgreSQL
 │   ├── RedGraniteCms.Server.Services/     # Business logic layer
 │   ├── RedGraniteCms.Server.GraphQl/      # HotChocolate GraphQL
 │   │   ├── Errors/                     # Error filter

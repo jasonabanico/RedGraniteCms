@@ -1,3 +1,5 @@
+using RedGraniteCms.Server.Web.Modules.Pages;
+
 namespace RedGraniteCms.Server.Web.ViewModels;
 
 /// <summary>
@@ -6,5 +8,5 @@ namespace RedGraniteCms.Server.Web.ViewModels;
 public class HomeViewModel
 {
     public string SiteName { get; init; } = "RedGraniteCms";
-    public List<PageViewModel> Pages { get; init; } = new();
+    public List<Page> Pages { get; init; } = new();
 }

@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using RedGraniteCms.Server.Core.Exceptions;
-using RedGraniteCms.Server.Core.Interfaces;
-using RedGraniteCms.Server.Web.ViewModels;
+using RedGraniteCms.Server.Web.Modules.Pages;
 
 namespace RedGraniteCms.Server.Web.Controllers;
 
@@ -10,25 +8,21 @@ namespace RedGraniteCms.Server.Web.Controllers;
 /// </summary>
 public class PageController : Controller
 {
-    private readonly IItemService _itemService;
+    private readonly IPageModule _pageModule;
 
-    public PageController(IItemService itemService)
+    public PageController(IPageModule pageModule)
     {
-        _itemService = itemService;
+        _pageModule = pageModule;
     }
 
     [Route("{slug}")]
     public async Task<IActionResult> Index(string slug)
     {
-        try
-        {
-            var item = await _itemService.GetItemBySlugAsync(slug);
-            var model = PageViewModel.FromItem(item!);
-            return View(model);
-        }
-        catch (NotFoundException)
-        {
+        var page = await _pageModule.GetPageBySlugAsync(slug);
+
+        if (page is null)
             return NotFound();
-        }
+
+        return View(page);
     }
 }

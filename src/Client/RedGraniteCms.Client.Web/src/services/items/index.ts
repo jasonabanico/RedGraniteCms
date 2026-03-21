@@ -102,11 +102,11 @@ export class ItemService {
     }
   }
 
-  async getItems(isoDateString: string, count = 20): Promise<GetItems["GetItems"]> {
+  async getItems(isoMaxDate?: string, count = 20, skip = 0): Promise<GetItems["GetItems"]> {
     try {
       const response = await apolloClient.query({
         query: GET_ITEMS,
-        variables: { isoDateString, count },
+        variables: { isoMaxDate, count, skip },
       });
 
       if (!response?.data) {

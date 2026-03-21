@@ -7,7 +7,7 @@ namespace RedGraniteCms.Server.GraphQl.Queries;
 
 /// <summary>
 /// GraphQL queries for Item operations.
-/// Queries are open by default. Add [Authorize] attribute to protect specific queries.
+/// Two query endpoints that accept optional filters for various use cases.
 /// </summary>
 public class ItemQuery
 {
@@ -18,28 +18,56 @@ public class ItemQuery
         _logger = logger;
     }
 
+    /// <summary>
+    /// Returns a single item. Provide at least one of id or slug.
+    /// Optionally filter by status and/or visibility.
+    /// 
+    /// Use cases:
+    ///   GetItem(id: "...")                                          — admin lookup by ID
+    ///   GetItem(slug: "about", status: PUBLISHED, visibility: PUBLIC) — public page by slug
+    /// </summary>
     [UseServiceScope]
     [GraphQLName("GetItem")]
-    // [Authorize] // Uncomment to require authentication
-    public async Task<Item?> GetItemAsync(string id, [Service] IItemService itemService)
+    public async Task<Item?> GetItemAsync(
+        string? id = null,
+        string? slug = null,
+        ItemStatus? status = null,
+        ItemVisibility? visibility = null,
+        [Service] IItemService itemService = null!)
     {
-        _logger.LogDebug("GetItem query called for ID: {ItemId}", id);
-        return await itemService.GetItemAsync(Guid.Parse(id));
+        _logger.LogDebug("GetItem query called with id: {Id}, slug: {Slug}, status: {Status}, visibility: {Visibility}", id, slug, status, visibility);
+
+        Guid? guidId = id is not null ? Guid.Parse(id) : null;
+        return await itemService.GetItemAsync(guidId, slug, status, visibility);
     }
 
+    /// <summary>
+    /// Returns a list of items with optional filters and pagination.
+    /// 
+    /// Use cases:
+    ///   GetItems(count: 10)                                                    — admin listing
+    ///   GetItems(status: PUBLISHED, visibility: PUBLIC, count: 50)             — public pages
+    ///   GetItems(contentType: "blog-post", status: PUBLISHED, count: 20)       — blog listing
+    ///   GetItems(isoMaxDate: "2025-01-01T00:00:00Z", count: 10, skip: 10)     — cursor pagination
+    /// </summary>
     [UseServiceScope]
     [GraphQLName("GetItems")]
-    // [Authorize] // Uncomment to require authentication
-    public async Task<List<Item>> GetItemsAsync(string? isoMaxDate, int? count, int skip = 0, [Service] IItemService itemService = null!)
+    public async Task<List<Item>> GetItemsAsync(
+        ItemStatus? status = null,
+        ItemVisibility? visibility = null,
+        string? contentType = null,
+        string? isoMaxDate = null,
+        int? count = null,
+        int skip = 0,
+        [Service] IItemService itemService = null!)
     {
-        _logger.LogDebug("GetItems query called with maxDate: {MaxDate}, count: {Count}, skip: {Skip}", isoMaxDate, count, skip);
+        _logger.LogDebug("GetItems query called with status: {Status}, visibility: {Visibility}, contentType: {ContentType}, maxDate: {MaxDate}, count: {Count}, skip: {Skip}",
+            status, visibility, contentType, isoMaxDate, count, skip);
 
-        DateTimeOffset maxDate;
-        if (!DateTimeOffset.TryParse(isoMaxDate, out maxDate))
-        {
-            maxDate = DateTimeOffset.MaxValue;
-        }
+        DateTimeOffset? maxDate = null;
+        if (DateTimeOffset.TryParse(isoMaxDate, out var parsed))
+            maxDate = parsed;
 
-        return await itemService.GetItemsAsync(maxDate, count, skip);
+        return await itemService.GetItemsAsync(status, visibility, contentType, maxDate, count, skip);
     }
 }

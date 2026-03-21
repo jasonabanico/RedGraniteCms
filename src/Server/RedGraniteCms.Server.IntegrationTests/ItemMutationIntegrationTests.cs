@@ -60,7 +60,7 @@ public class ItemMutationIntegrationTests
         result.Summary.Should().Be("Short Description");
 
         // Verify item was added to repository
-        var items = await repository.GetItemsAsync(null, 10);
+        var items = await repository.GetItemsAsync(count: 10);
         items.Should().HaveCount(1);
         items[0].Title.Should().Be("New Item");
     }
@@ -129,7 +129,7 @@ public class ItemMutationIntegrationTests
         result!.Title.Should().Be("Updated Name");
 
         // Verify item was updated in repository
-        var storedItem = await repository.GetItemAsync(item.Id);
+        var storedItem = await repository.GetItemAsync(id: item.Id);
         storedItem?.Title.Should().Be("Updated Name");
     }
 
@@ -170,14 +170,14 @@ public class ItemMutationIntegrationTests
         await repository.AddItemAsync(item);
 
         // Verify item exists
-        var existingItems = await repository.GetItemsAsync(null, 10);
+        var existingItems = await repository.GetItemsAsync(count: 10);
         existingItems.Should().HaveCount(1);
 
         // Act
         await service.DeleteItemAsync(item.Id);
 
         // Assert - Verify item was deleted from repository
-        var items = await repository.GetItemsAsync(null, 10);
+        var items = await repository.GetItemsAsync(count: 10);
         items.Should().BeEmpty();
     }
 

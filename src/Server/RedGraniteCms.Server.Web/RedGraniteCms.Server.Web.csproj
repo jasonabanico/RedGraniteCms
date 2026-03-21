@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -9,16 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\RedGraniteCms.Server.Core\RedGraniteCms.Server.Core.csproj" />
-    <ProjectReference Include="..\RedGraniteCms.Server.Data\RedGraniteCms.Server.Data.csproj" />
-    <ProjectReference Include="..\RedGraniteCms.Server.Services\RedGraniteCms.Server.Services.csproj" />
+    <Folder Include="Models\" />
+    <Folder Include="Services\" />
   </ItemGroup>
 
   <Target Name="BuildReactApp" BeforeTargets="Build" Condition="'$(Configuration)' == 'Release'">
