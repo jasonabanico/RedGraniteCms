@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -18,6 +20,9 @@ public static class DataExtensions
     {
         services.AddDbContext<AppDbContext>(options =>
         {
+            options.ConfigureWarnings(w =>
+                w.Ignore(RelationalEventId.PendingModelChangesWarning));
+
             if (environment.IsDevelopment())
             {
                 var sqliteConnection = configuration.GetConnectionString("DefaultConnection")
@@ -32,5 +37,16 @@ public static class DataExtensions
                        .UseSnakeCaseNamingConvention();
             }
         });
+
+        services.AddIdentityCore<IdentityUser>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 8;
+            })
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<AppDbContext>();
     }
 }

@@ -5,6 +5,7 @@ using RedGraniteCms.Server.Core.Interfaces;
 using RedGraniteCms.Server.Core.Models;
 using RedGraniteCms.Server.GraphQl.Types;
 using RedGraniteCms.Server.GraphQl.Validators;
+using System.Security.Claims;
 using System.Text.Json.Nodes;
 using ValidationException = RedGraniteCms.Server.Core.Exceptions.ValidationException;
 
@@ -12,9 +13,9 @@ namespace RedGraniteCms.Server.GraphQl.Mutations;
 
 /// <summary>
 /// GraphQL mutations for Item operations.
-/// TODO: Re-enable [Authorize] once authentication is configured.
+/// All mutations require authentication.
 /// </summary>
-// [Authorize]
+[Authorize]
 public class ItemMutation
 {
     private readonly ILogger<ItemMutation> _logger;
@@ -26,9 +27,13 @@ public class ItemMutation
 
     [UseServiceScope]
     [GraphQLName("AddItem")]
-    public async Task<Item?> AddItemAsync(ItemInput item, [Service] IItemService itemService)
+    public async Task<Item?> AddItemAsync(
+        ItemInput item,
+        ClaimsPrincipal claimsPrincipal,
+        [Service] IItemService itemService)
     {
-        _logger.LogDebug("AddItem mutation called for: {ItemTitle}", item.Title);
+        var userId = GetUserId(claimsPrincipal);
+        _logger.LogDebug("AddItem mutation called by {UserId} for: {ItemTitle}", userId, item.Title);
 
         // Validate input
         var validator = new ItemInputValidator();
@@ -47,7 +52,7 @@ public class ItemMutation
         JsonObject? metadata = item.MetadataJson is not null ? JsonNode.Parse(item.MetadataJson)?.AsObject() : null;
 
         var newItem = Item.Create(
-            ownerId: item.OwnerId,
+            ownerId: userId,
             contentType: item.ContentType,
             title: item.Title,
             summary: item.Summary,
@@ -60,7 +65,8 @@ public class ItemMutation
             ancestorIds: item.AncestorIds,
             sortOrder: item.SortOrder ?? 0,
             metadata: metadata,
-            tags: item.Tags
+            tags: item.Tags,
+            createdBy: userId
         );
 
         return await itemService.AddItemAsync(newItem);
@@ -68,9 +74,13 @@ public class ItemMutation
 
     [UseServiceScope]
     [GraphQLName("UpdateItem")]
-    public async Task<Item?> UpdateItemAsync(ItemInput item, [Service] IItemService itemService)
+    public async Task<Item?> UpdateItemAsync(
+        ItemInput item,
+        ClaimsPrincipal claimsPrincipal,
+        [Service] IItemService itemService)
     {
-        _logger.LogDebug("UpdateItem mutation called for ID: {ItemId}", item.Id);
+        var userId = GetUserId(claimsPrincipal);
+        _logger.LogDebug("UpdateItem mutation called by {UserId} for ID: {ItemId}", userId, item.Id);
 
         // Validate input with ID requirement
         var validator = new ItemInputUpdateValidator();
@@ -89,7 +99,7 @@ public class ItemMutation
         JsonObject? metadata = item.MetadataJson is not null ? JsonNode.Parse(item.MetadataJson)?.AsObject() : null;
 
         var updatedItem = Item.Create(
-            ownerId: item.OwnerId,
+            ownerId: userId,
             contentType: item.ContentType,
             title: item.Title,
             summary: item.Summary,
@@ -102,7 +112,8 @@ public class ItemMutation
             ancestorIds: item.AncestorIds,
             sortOrder: item.SortOrder ?? 0,
             metadata: metadata,
-            tags: item.Tags
+            tags: item.Tags,
+            createdBy: userId
         );
 
         return await itemService.UpdateItemAsync(Guid.Parse(item.Id!), updatedItem);
@@ -110,9 +121,13 @@ public class ItemMutation
 
     [UseServiceScope]
     [GraphQLName("DeleteItem")]
-    public async Task<bool> DeleteItemAsync(string id, [Service] IItemService itemService)
+    public async Task<bool> DeleteItemAsync(
+        string id,
+        ClaimsPrincipal claimsPrincipal,
+        [Service] IItemService itemService)
     {
-        _logger.LogDebug("DeleteItem mutation called for ID: {ItemId}", id);
+        var userId = GetUserId(claimsPrincipal);
+        _logger.LogDebug("DeleteItem mutation called by {UserId} for ID: {ItemId}", userId, id);
 
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -121,5 +136,11 @@ public class ItemMutation
 
         await itemService.DeleteItemAsync(Guid.Parse(id));
         return true;
+    }
+
+    private static string GetUserId(ClaimsPrincipal principal)
+    {
+        return principal.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? throw new UnauthorizedAccessException("User ID claim not found.");
     }
 }

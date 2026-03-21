@@ -3,7 +3,7 @@ namespace RedGraniteCms.Server.GraphQl.Types;
 public class ItemInput
 {
     public string? Id { get; set; }
-    public string OwnerId { get; set; } = string.Empty;
+    public string? OwnerId { get; set; }
     public string ContentType { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string? Summary { get; set; }

@@ -11,9 +11,6 @@ public class ItemInputValidator : AbstractValidator<ItemInput>
 {
     public ItemInputValidator()
     {
-        RuleFor(x => x.OwnerId)
-            .NotEmpty().WithMessage("Owner ID is required.");
-
         RuleFor(x => x.ContentType)
             .NotEmpty().WithMessage("Content type is required.")
             .MaximumLength(100).WithMessage("Content type must not exceed 100 characters.");

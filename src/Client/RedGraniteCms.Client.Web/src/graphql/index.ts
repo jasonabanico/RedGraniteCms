@@ -11,12 +11,8 @@ const httpLink = createHttpLink({
 });
 
 // Auth link for injecting authentication token
-// TODO: Integrate with your authentication provider (e.g., MSAL)
 const authLink = setContext((_, { headers }) => {
-    // Get the authentication token from wherever you store it
-    // Example: const token = localStorage.getItem('token');
-    // Example with MSAL: const token = await msalInstance.acquireTokenSilent(...).accessToken;
-    const token: string | null = null; // Replace with actual token retrieval
+    const token = localStorage.getItem('auth_token');
 
     return {
         headers: {

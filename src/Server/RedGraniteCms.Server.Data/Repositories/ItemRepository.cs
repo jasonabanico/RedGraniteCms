@@ -116,7 +116,8 @@ public class ItemRepository : IItemRepository
                 ancestorIds: item.AncestorIds,
                 sortOrder: item.SortOrder,
                 metadata: item.Metadata,
-                tags: item.Tags
+                tags: item.Tags,
+                modifiedBy: item.CreatedBy
             );
             _dbContext.Update(savedItem);
             await _dbContext.SaveChangesAsync();

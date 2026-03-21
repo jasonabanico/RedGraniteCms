@@ -29,6 +29,7 @@ public abstract class AuditableEntity
     protected AuditableEntity(string? createdBy)
     {
         CreatedBy = createdBy;
+        LastModifiedBy = createdBy;
     }
 
     /// <summary>
