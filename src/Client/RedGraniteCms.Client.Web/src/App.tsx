@@ -10,7 +10,7 @@ function App() {
       <div className="w-full h-full flex flex-col items-center">
         <h1 className="text-3xl font-bold mt-6 mb-2">RedGraniteCms</h1>
         <hr className="w-full border-border mb-4" />
-        <Router>
+        <Router basename="/admin">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/addPage" element={<AddPageForm />} />
