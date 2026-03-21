@@ -30,9 +30,9 @@ public class ItemQuery
     [UseServiceScope]
     [GraphQLName("GetItems")]
     // [Authorize] // Uncomment to require authentication
-    public async Task<List<Item>> GetItemsAsync(string? isoMaxDate, int? count, [Service] IItemService itemService)
+    public async Task<List<Item>> GetItemsAsync(string? isoMaxDate, int? count, int skip = 0, [Service] IItemService itemService = null!)
     {
-        _logger.LogDebug("GetItems query called with maxDate: {MaxDate}, count: {Count}", isoMaxDate, count);
+        _logger.LogDebug("GetItems query called with maxDate: {MaxDate}, count: {Count}, skip: {Skip}", isoMaxDate, count, skip);
 
         DateTimeOffset maxDate;
         if (!DateTimeOffset.TryParse(isoMaxDate, out maxDate))
@@ -40,6 +40,6 @@ public class ItemQuery
             maxDate = DateTimeOffset.MaxValue;
         }
 
-        return await itemService.GetItemsAsync(maxDate, count);
+        return await itemService.GetItemsAsync(maxDate, count, skip);
     }
 }

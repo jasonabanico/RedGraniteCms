@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using RedGraniteCms.Server.Core.Exceptions;
 using RedGraniteCms.Server.Core.Interfaces;
-using RedGraniteCms.Server.Core.Models;
 using RedGraniteCms.Server.Web.ViewModels;
 
 namespace RedGraniteCms.Server.Web.Controllers;
@@ -20,18 +20,15 @@ public class PageController : Controller
     [Route("{slug}")]
     public async Task<IActionResult> Index(string slug)
     {
-        // Find the published, public item that matches this slug
-        var items = await _itemService.GetItemsAsync(maxDate: null, count: null);
-
-        var item = items.FirstOrDefault(i =>
-            i.Slug == slug
-            && i.Status == ItemStatus.Published
-            && i.Visibility == ItemVisibility.Public);
-
-        if (item is null)
+        try
+        {
+            var item = await _itemService.GetItemBySlugAsync(slug);
+            var model = PageViewModel.FromItem(item!);
+            return View(model);
+        }
+        catch (NotFoundException)
+        {
             return NotFound();
-
-        var model = PageViewModel.FromItem(item);
-        return View(model);
+        }
     }
 }

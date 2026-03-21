@@ -1,4 +1,5 @@
-import { Alert } from 'react-bootstrap';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface ErrorAlertProps {
     title?: string;
@@ -11,9 +12,10 @@ interface ErrorAlertProps {
  */
 export function ErrorAlert({ title = 'Error', message, onDismiss }: ErrorAlertProps) {
     return (
-        <Alert variant="danger" dismissible={!!onDismiss} onClose={onDismiss}>
-            <Alert.Heading>{title}</Alert.Heading>
-            <p className="mb-0">{message}</p>
+        <Alert variant="destructive" onDismiss={onDismiss}>
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>{title}</AlertTitle>
+            <AlertDescription>{message}</AlertDescription>
         </Alert>
     );
 }

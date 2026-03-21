@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using RedGraniteCms.Server.Core.Interfaces;
-using RedGraniteCms.Server.Core.Models;
 using RedGraniteCms.Server.Web.ViewModels;
 
 namespace RedGraniteCms.Server.Web.Controllers;
@@ -19,13 +18,9 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var items = await _itemService.GetItemsAsync(maxDate: null, count: null);
+        var items = await _itemService.GetPublishedItemsAsync(count: 50);
 
         var pages = items
-            .Where(i => i.Status == ItemStatus.Published
-                     && i.Visibility == ItemVisibility.Public)
-            .OrderBy(i => i.SortOrder)
-            .ThenByDescending(i => i.PublishedAt)
             .Select(PageViewModel.FromItem)
             .ToList();
 

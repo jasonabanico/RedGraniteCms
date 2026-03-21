@@ -17,6 +17,14 @@ public class AppDbContext : DbContext
 
         item.HasKey(e => e.Id);
 
+        // Indexes
+        item.HasIndex(e => e.OwnerId);
+        item.HasIndex(e => e.Slug);
+        item.HasIndex(e => new { e.OwnerId, e.ContentType });
+        item.HasIndex(e => new { e.OwnerId, e.CreatedAt });
+        item.HasIndex(e => new { e.Status, e.Visibility });
+        item.HasIndex(e => e.LastModifiedAt);
+
         // Value converters for complex types
         var jsonOptions = new JsonSerializerOptions();
 
