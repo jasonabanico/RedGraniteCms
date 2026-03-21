@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RedGraniteCms.Server.Core.Models;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -44,5 +45,33 @@ public class AppDbContext : DbContext
             .HasConversion(
                 v => JsonSerializer.Serialize(v, jsonOptions),
                 v => (IReadOnlyList<string>)(JsonSerializer.Deserialize<List<string>>(v, jsonOptions) ?? new List<string>()));
+
+        // SQLite does not support DateTimeOffset in ORDER BY.
+        // Convert to ISO 8601 strings which sort correctly as text.
+        if (Database.IsSqlite())
+        {
+            var dateTimeOffsetConverter = new ValueConverter<DateTimeOffset, string>(
+                v => v.ToString("O"),
+                v => DateTimeOffset.Parse(v));
+
+            var nullableDateTimeOffsetConverter = new ValueConverter<DateTimeOffset?, string?>(
+                v => v.HasValue ? v.Value.ToString("O") : null,
+                v => v != null ? DateTimeOffset.Parse(v) : null);
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(DateTimeOffset))
+                    {
+                        property.SetValueConverter(dateTimeOffsetConverter);
+                    }
+                    else if (property.ClrType == typeof(DateTimeOffset?))
+                    {
+                        property.SetValueConverter(nullableDateTimeOffsetConverter);
+                    }
+                }
+            }
+        }
     }
 }
