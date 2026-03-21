@@ -1,8 +1,8 @@
 import itemService, { ItemService, ServiceError } from '../../services/items';
-import type { Page, PageInput, AddPageResult, UpdatePageResult } from './types';
+import type { Page, PageInput, PageStatus, AddPageResult, UpdatePageResult } from './types';
 
 // Re-export types and errors only — no Item or GraphQL types
-export type { Page, PageInput, AddPageResult, UpdatePageResult };
+export type { Page, PageInput, PageStatus, AddPageResult, UpdatePageResult };
 export { ServiceError };
 
 /**
@@ -35,6 +35,8 @@ class PageService {
             id: '',
             ownerId: 'admin',
             contentType: 'page',
+            status: input.status ?? 'Published',
+            visibility: 'Public',
             title: input.title,
             slug: input.slug,
             summary: input.summary,
@@ -52,6 +54,8 @@ class PageService {
             id: input.id,
             ownerId: 'admin',
             contentType: 'page',
+            status: input.status ?? 'Published',
+            visibility: 'Public',
             title: input.title,
             slug: input.slug,
             summary: input.summary,
@@ -67,14 +71,23 @@ class PageService {
 }
 
 /** Map a GraphQL Item response to a Page. */
-function mapToPage(item: { id: string; title: string; slug: string | null; summary: string | null; content?: string | null }): Page {
+function mapToPage(item: { id: string; title: string; slug: string | null; summary: string | null; content?: string | null; status?: string | null }): Page {
     return {
         id: item.id,
         title: item.title,
         slug: item.slug,
         summary: item.summary,
         content: item.content ?? null,
+        status: mapStatus(item.status),
     };
+}
+
+function mapStatus(status?: string | null): PageStatus {
+    switch (status) {
+        case 'PUBLISHED': return 'Published';
+        case 'ARCHIVED': return 'Archived';
+        default: return 'Draft';
+    }
 }
 
 export function createPageService(items: ItemService = itemService): PageService {

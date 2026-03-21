@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import type { PageInput, AddPageResult } from '../../../modules/pages/types';
+import type { PageInput, PageStatus, AddPageResult } from '../../../modules/pages/types';
 import { useAppDispatch } from '../../../app/hooks';
 import { savePage } from '../listPages/listPagesTableSlice';
 import { addPage } from './addPageFormSlice';
@@ -31,6 +31,7 @@ export function AddPageForm() {
     const [slug, setSlug] = useState('');
     const [summary, setSummary] = useState('');
     const [content, setContent] = useState('');
+    const [status, setStatus] = useState<PageStatus>('Published');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
@@ -67,6 +68,7 @@ export function AddPageForm() {
             slug: slug || undefined,
             summary: summary || undefined,
             content: content || undefined,
+            status,
         };
 
         try {
@@ -136,6 +138,22 @@ export function AddPageForm() {
                     {validationErrors.slug && (
                         <p className="text-sm text-destructive">{validationErrors.slug}</p>
                     )}
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <select
+                        id="status"
+                        name="status"
+                        value={status}
+                        onChange={e => setStatus(e.target.value as PageStatus)}
+                        disabled={isSubmitting}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        <option value="Draft">Draft</option>
+                        <option value="Published">Published</option>
+                        <option value="Archived">Archived</option>
+                    </select>
                 </div>
 
                 <div className="space-y-2">

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
-import type { PageInput } from '../../../modules/pages/types';
+import type { PageInput, PageStatus } from '../../../modules/pages/types';
 import { useAppDispatch } from '../../../app/hooks';
 import { updatePage } from './editPageFormSlice';
 import pageService from '../../../modules/pages';
@@ -31,6 +31,7 @@ export function EditPageForm() {
     const [slug, setSlug] = useState('');
     const [summary, setSummary] = useState('');
     const [content, setContent] = useState('');
+    const [status, setStatus] = useState<PageStatus>('Draft');
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -58,6 +59,7 @@ export function EditPageForm() {
                     setSlug(page.slug || '');
                     setSummary(page.summary || '');
                     setContent(page.content || '');
+                    setStatus(page.status);
                 } else {
                     setError('Page not found');
                 }
@@ -102,6 +104,7 @@ export function EditPageForm() {
             slug: slug || undefined,
             summary: summary || undefined,
             content: content || undefined,
+            status,
         };
 
         try {
@@ -173,6 +176,22 @@ export function EditPageForm() {
                     {validationErrors.slug && (
                         <p className="text-sm text-destructive">{validationErrors.slug}</p>
                     )}
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <select
+                        id="status"
+                        name="status"
+                        value={status}
+                        onChange={e => setStatus(e.target.value as PageStatus)}
+                        disabled={isSubmitting}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        <option value="Draft">Draft</option>
+                        <option value="Published">Published</option>
+                        <option value="Archived">Archived</option>
+                    </select>
                 </div>
 
                 <div className="space-y-2">

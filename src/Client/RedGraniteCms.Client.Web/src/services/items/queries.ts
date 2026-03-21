@@ -7,6 +7,7 @@ export const GET_ITEMS = gql`
             title
             slug
             summary
+            status
         }
     }
 `;
@@ -19,6 +20,7 @@ export const GET_ITEM = gql`
             slug
             summary
             content
+            status
         }
     }
 `;
