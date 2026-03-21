@@ -3,9 +3,7 @@
     <StartupCommand>npm run dev</StartupCommand>
     <JavaScriptTestFramework>Vitest</JavaScriptTestFramework>
   </PropertyGroup>
-
   <ItemGroup>
-    <Folder Include="src\" />
     <Folder Include="public\" />
   </ItemGroup>
 </Project>

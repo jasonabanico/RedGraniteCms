@@ -67,11 +67,61 @@ public class ItemServiceTests
             CreateTestItem("Item 1"),
             CreateTestItem("Item 2"),
         };
-        _mockRepository.Setup(r => r.GetItemsAsync(maxDate, count))
+        _mockRepository.Setup(r => r.GetItemsAsync(maxDate, count, 0))
             .ReturnsAsync(expectedItems);
 
         // Act
         var result = await _service.GetItemsAsync(maxDate, count);
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().BeEquivalentTo(expectedItems);
+    }
+
+    [Fact]
+    public async Task GetItemBySlugAsync_WhenItemExists_ReturnsItem()
+    {
+        // Arrange
+        var expectedItem = CreateTestItem("Slug Item");
+        _mockRepository.Setup(r => r.GetItemBySlugAsync("test-slug"))
+            .ReturnsAsync(expectedItem);
+
+        // Act
+        var result = await _service.GetItemBySlugAsync("test-slug");
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().Be(expectedItem);
+    }
+
+    [Fact]
+    public async Task GetItemBySlugAsync_WhenItemNotFound_ThrowsNotFoundException()
+    {
+        // Arrange
+        _mockRepository.Setup(r => r.GetItemBySlugAsync("missing-slug"))
+            .ReturnsAsync((Item?)null);
+
+        // Act
+        var act = async () => await _service.GetItemBySlugAsync("missing-slug");
+
+        // Assert
+        await act.Should().ThrowAsync<NotFoundException>();
+    }
+
+    [Fact]
+    public async Task GetPublishedItemsAsync_ReturnsItemsFromRepository()
+    {
+        // Arrange
+        var expectedItems = new List<Item>
+        {
+            CreateTestItem("Published 1"),
+            CreateTestItem("Published 2"),
+        };
+        _mockRepository.Setup(r => r.GetPublishedItemsAsync(50, 0))
+            .ReturnsAsync(expectedItems);
+
+        // Act
+        var result = await _service.GetPublishedItemsAsync(50);
 
         // Assert
         result.Should().HaveCount(2);

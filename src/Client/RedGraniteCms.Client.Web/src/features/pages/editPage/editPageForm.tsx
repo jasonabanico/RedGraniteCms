@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Container, Button } from 'react-bootstrap';
-import Form from 'react-bootstrap/Form';
 import { z } from 'zod';
 import { ItemInput } from '../../../../__generated__/globalTypes';
 import { useAppDispatch } from '../../../app/hooks';
 import { updatePage } from './editPageFormSlice';
 import pageService from '../../../services/pages';
 import { LoadingSpinner, ErrorAlert } from '../../../components';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 // Validation schema
 const pageSchema = z.object({
@@ -131,88 +133,92 @@ export function EditPageForm() {
     }
 
     return (
-        <Container>
-            <h2>Edit Page</h2>
+        <div className="container mx-auto max-w-2xl px-4">
+            <h2 className="text-2xl font-bold mb-4">Edit Page</h2>
 
             {error && <ErrorAlert message={error} onDismiss={() => setError(null)} />}
 
-            <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3" controlId="formPageTitle">
-                    <Form.Label>Title</Form.Label>
-                    <Form.Control
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                        id="title"
                         type="text"
                         name="title"
                         placeholder="Enter title"
                         value={title}
                         onChange={e => setTitle(e.target.value)}
-                        isInvalid={!!validationErrors.title}
                         disabled={isSubmitting}
+                        className={validationErrors.title ? 'border-destructive' : ''}
                     />
-                    <Form.Control.Feedback type="invalid">
-                        {validationErrors.title}
-                    </Form.Control.Feedback>
-                </Form.Group>
+                    {validationErrors.title && (
+                        <p className="text-sm text-destructive">{validationErrors.title}</p>
+                    )}
+                </div>
 
-                <Form.Group className="mb-3" controlId="formPageSlug">
-                    <Form.Label>Slug</Form.Label>
-                    <Form.Control
+                <div className="space-y-2">
+                    <Label htmlFor="slug">Slug</Label>
+                    <Input
+                        id="slug"
                         type="text"
                         name="slug"
                         placeholder="e.g. my-first-page"
                         value={slug}
                         onChange={e => setSlug(e.target.value)}
-                        isInvalid={!!validationErrors.slug}
                         disabled={isSubmitting}
+                        className={validationErrors.slug ? 'border-destructive' : ''}
                     />
-                    <Form.Text className="text-muted">
+                    <p className="text-sm text-muted-foreground">
                         URL-safe identifier (lowercase, hyphens only).
-                    </Form.Text>
-                    <Form.Control.Feedback type="invalid">
-                        {validationErrors.slug}
-                    </Form.Control.Feedback>
-                </Form.Group>
+                    </p>
+                    {validationErrors.slug && (
+                        <p className="text-sm text-destructive">{validationErrors.slug}</p>
+                    )}
+                </div>
 
-                <Form.Group className="mb-3" controlId="formPageSummary">
-                    <Form.Label>Summary</Form.Label>
-                    <Form.Control
-                        as="textarea"
+                <div className="space-y-2">
+                    <Label htmlFor="summary">Summary</Label>
+                    <Textarea
+                        id="summary"
                         rows={2}
                         name="summary"
                         placeholder="Brief summary for listings and SEO"
                         value={summary}
                         onChange={e => setSummary(e.target.value)}
-                        isInvalid={!!validationErrors.summary}
                         disabled={isSubmitting}
+                        className={validationErrors.summary ? 'border-destructive' : ''}
                     />
-                    <Form.Control.Feedback type="invalid">
-                        {validationErrors.summary}
-                    </Form.Control.Feedback>
-                </Form.Group>
+                    {validationErrors.summary && (
+                        <p className="text-sm text-destructive">{validationErrors.summary}</p>
+                    )}
+                </div>
 
-                <Form.Group className="mb-3" controlId="formPageContent">
-                    <Form.Label>Content</Form.Label>
-                    <Form.Control
-                        as="textarea"
+                <div className="space-y-2">
+                    <Label htmlFor="content">Content</Label>
+                    <Textarea
+                        id="content"
                         rows={8}
                         name="content"
                         placeholder="Page content (HTML or Markdown)"
                         value={content}
                         onChange={e => setContent(e.target.value)}
-                        isInvalid={!!validationErrors.content}
                         disabled={isSubmitting}
+                        className={validationErrors.content ? 'border-destructive' : ''}
                     />
-                    <Form.Control.Feedback type="invalid">
-                        {validationErrors.content}
-                    </Form.Control.Feedback>
-                </Form.Group>
+                    {validationErrors.content && (
+                        <p className="text-sm text-destructive">{validationErrors.content}</p>
+                    )}
+                </div>
 
-                <Button variant="primary" type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Saving...' : 'Submit'}
-                </Button>
-                <Button variant="secondary" onClick={handleCancel} className="mx-2" disabled={isSubmitting}>
-                    Cancel
-                </Button>
-            </Form>
-        </Container>
+                <div className="flex gap-2">
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? 'Saving...' : 'Submit'}
+                    </Button>
+                    <Button variant="secondary" type="button" onClick={handleCancel} disabled={isSubmitting}>
+                        Cancel
+                    </Button>
+                </div>
+            </form>
+        </div>
     );
 }

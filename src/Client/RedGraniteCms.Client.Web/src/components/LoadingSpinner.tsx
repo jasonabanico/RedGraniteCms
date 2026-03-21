@@ -1,4 +1,4 @@
-import { Spinner, Container } from 'react-bootstrap';
+import { Loader2 } from 'lucide-react';
 
 interface LoadingSpinnerProps {
     message?: string;
@@ -9,12 +9,11 @@ interface LoadingSpinnerProps {
  * Reusable loading spinner component.
  */
 export function LoadingSpinner({ message = 'Loading...', size }: LoadingSpinnerProps) {
+    const iconSize = size === 'sm' ? 'h-5 w-5' : 'h-8 w-8';
     return (
-        <Container className="d-flex flex-column align-items-center justify-content-center py-5">
-            <Spinner animation="border" role="status" size={size}>
-                <span className="visually-hidden">{message}</span>
-            </Spinner>
-            <p className="mt-3 text-muted">{message}</p>
-        </Container>
+        <div className="flex flex-col items-center justify-center py-10">
+            <Loader2 className={`${iconSize} animate-spin text-primary`} />
+            <p className="mt-3 text-sm text-muted-foreground">{message}</p>
+        </div>
     );
 }

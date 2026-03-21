@@ -5,7 +5,9 @@ namespace RedGraniteCms.Server.Core.Interfaces;
 public interface IItemService
 {
     Task<Item?> GetItemAsync(Guid id);
-    Task<List<Item>> GetItemsAsync(DateTimeOffset? maxDate, int? count);
+    Task<Item?> GetItemBySlugAsync(string slug);
+    Task<List<Item>> GetItemsAsync(DateTimeOffset? maxDate, int? count, int skip = 0);
+    Task<List<Item>> GetPublishedItemsAsync(int? count, int skip = 0);
     Task<Item?> AddItemAsync(Item item);
     Task<Item?> UpdateItemAsync(Guid id, Item item);
     Task DeleteItemAsync(Guid id);

@@ -131,7 +131,16 @@ public class InMemoryItemRepository : IItemRepository
         return Task.FromResult(item);
     }
 
-    public Task<List<Item>> GetItemsAsync(DateTimeOffset? maxDate, int? count)
+    public Task<Item?> GetItemBySlugAsync(string slug)
+    {
+        var item = _items.FirstOrDefault(i =>
+            i.Slug == slug
+            && i.Status == ItemStatus.Published
+            && i.Visibility == ItemVisibility.Public);
+        return Task.FromResult(item);
+    }
+
+    public Task<List<Item>> GetItemsAsync(DateTimeOffset? maxDate, int? count, int skip = 0)
     {
         var effectiveMaxDate = maxDate ?? DateTimeOffset.MaxValue;
         var effectiveCount = count ?? 50;
@@ -139,6 +148,23 @@ public class InMemoryItemRepository : IItemRepository
         var items = _items
             .Where(i => i.LastModifiedAt < effectiveMaxDate)
             .OrderByDescending(i => i.LastModifiedAt)
+            .Skip(skip)
+            .Take(effectiveCount)
+            .ToList();
+
+        return Task.FromResult(items);
+    }
+
+    public Task<List<Item>> GetPublishedItemsAsync(int? count, int skip = 0)
+    {
+        var effectiveCount = count ?? 50;
+
+        var items = _items
+            .Where(i => i.Status == ItemStatus.Published
+                     && i.Visibility == ItemVisibility.Public)
+            .OrderBy(i => i.SortOrder)
+            .ThenByDescending(i => i.PublishedAt)
+            .Skip(skip)
             .Take(effectiveCount)
             .ToList();
 

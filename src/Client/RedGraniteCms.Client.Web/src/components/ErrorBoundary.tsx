@@ -1,5 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Container, Alert, Button } from 'react-bootstrap';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
 
 interface Props {
     children: ReactNode;
@@ -32,7 +34,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
         this.setState({ errorInfo });
-        // Log error to an error reporting service
         console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
 
@@ -55,32 +56,34 @@ export class ErrorBoundary extends Component<Props, State> {
             }
 
             return (
-                <Container className="mt-5">
-                    <Alert variant="danger">
-                        <Alert.Heading>Something went wrong</Alert.Heading>
-                        <p>
-                            An unexpected error occurred. Please try refreshing the page or contact support if the problem persists.
-                        </p>
-                        {import.meta.env.DEV && this.state.error && (
-                            <details className="mt-3">
-                                <summary>Error Details</summary>
-                                <pre className="mt-2 p-3 bg-light text-danger">
-                                    {this.state.error.toString()}
-                                    {this.state.errorInfo?.componentStack}
-                                </pre>
-                            </details>
-                        )}
-                        <hr />
-                        <div className="d-flex gap-2">
-                            <Button variant="outline-danger" onClick={this.handleReset}>
-                                Try Again
-                            </Button>
-                            <Button variant="danger" onClick={this.handleReload}>
-                                Reload Page
-                            </Button>
-                        </div>
+                <div className="container mx-auto mt-10 max-w-2xl px-4">
+                    <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Something went wrong</AlertTitle>
+                        <AlertDescription>
+                            <p>
+                                An unexpected error occurred. Please try refreshing the page or contact support if the problem persists.
+                            </p>
+                            {import.meta.env.DEV && this.state.error && (
+                                <details className="mt-3">
+                                    <summary className="cursor-pointer">Error Details</summary>
+                                    <pre className="mt-2 rounded-md bg-muted p-3 text-sm text-destructive overflow-auto">
+                                        {this.state.error.toString()}
+                                        {this.state.errorInfo?.componentStack}
+                                    </pre>
+                                </details>
+                            )}
+                            <div className="flex gap-2 mt-4">
+                                <Button variant="outline" onClick={this.handleReset}>
+                                    Try Again
+                                </Button>
+                                <Button variant="destructive" onClick={this.handleReload}>
+                                    Reload Page
+                                </Button>
+                            </div>
+                        </AlertDescription>
                     </Alert>
-                </Container>
+                </div>
             );
         }
 

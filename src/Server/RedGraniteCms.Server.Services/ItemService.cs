@@ -31,13 +31,38 @@ public class ItemService : IItemService
         return item;
     }
 
-    public async Task<List<Item>> GetItemsAsync(DateTimeOffset? maxDate, int? count)
+    public async Task<Item?> GetItemBySlugAsync(string slug)
     {
-        _logger.LogDebug("Getting items with maxDate: {MaxDate}, count: {Count}", maxDate, count);
+        _logger.LogDebug("Getting item with slug: {Slug}", slug);
+
+        var item = await _repository.GetItemBySlugAsync(slug);
+
+        if (item is null)
+        {
+            _logger.LogWarning("Item not found for slug: {Slug}", slug);
+            throw new NotFoundException(nameof(Item), slug);
+        }
+
+        return item;
+    }
+
+    public async Task<List<Item>> GetItemsAsync(DateTimeOffset? maxDate, int? count, int skip = 0)
+    {
+        _logger.LogDebug("Getting items with maxDate: {MaxDate}, count: {Count}, skip: {Skip}", maxDate, count, skip);
         
-        var items = await _repository.GetItemsAsync(maxDate, count);
+        var items = await _repository.GetItemsAsync(maxDate, count, skip);
         
         _logger.LogDebug("Retrieved {Count} items", items.Count);
+        return items;
+    }
+
+    public async Task<List<Item>> GetPublishedItemsAsync(int? count, int skip = 0)
+    {
+        _logger.LogDebug("Getting published items with count: {Count}, skip: {Skip}", count, skip);
+
+        var items = await _repository.GetPublishedItemsAsync(count, skip);
+
+        _logger.LogDebug("Retrieved {Count} published items", items.Count);
         return items;
     }
 
@@ -55,7 +80,6 @@ public class ItemService : IItemService
     {
         _logger.LogInformation("Updating item: {ItemId}", id);
         
-        // Verify item exists first
         var existingItem = await _repository.GetItemAsync(id);
         if (existingItem is null)
         {
@@ -73,7 +97,6 @@ public class ItemService : IItemService
     {
         _logger.LogInformation("Deleting item: {ItemId}", id);
         
-        // Verify item exists first
         var existingItem = await _repository.GetItemAsync(id);
         if (existingItem is null)
         {

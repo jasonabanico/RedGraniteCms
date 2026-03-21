@@ -5,10 +5,14 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>RedGraniteCms.Server.Web</RootNamespace>
+    <SpaRoot>..\..\Client\RedGraniteCms.Client.Web\</SpaRoot>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -16,5 +20,19 @@
     <ProjectReference Include="..\RedGraniteCms.Server.Data\RedGraniteCms.Server.Data.csproj" />
     <ProjectReference Include="..\RedGraniteCms.Server.Services\RedGraniteCms.Server.Services.csproj" />
   </ItemGroup>
+
+  <Target Name="BuildReactApp" BeforeTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <Message Text="Building React admin app..." Importance="high" />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
+  </Target>
+
+  <Target Name="CopyReactApp" AfterTargets="BuildReactApp" Condition="'$(Configuration)' == 'Release'">
+    <Message Text="Copying React admin app to wwwroot/admin..." Importance="high" />
+    <ItemGroup>
+      <ReactFiles Include="$(SpaRoot)build\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ReactFiles)" DestinationFolder="$(ProjectDir)wwwroot\admin\%(RecursiveDir)" />
+  </Target>
 
 </Project>

@@ -20,9 +20,7 @@ public class Program
             .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
         
         // Database
-        var connectionString = builder.Configuration.GetConnectionString("CosmosConnection");
-        builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseCosmos(connectionString!, "RedGraniteCms"));
+        builder.Services.AddDatabase(builder.Configuration, builder.Environment);
         
         // Application services
         builder.Services.AddRepositories();
@@ -49,8 +47,8 @@ public class Program
 
         var app = builder.Build();
 
-        // Ensure database is created at startup
-        await EnsureDatabaseCreatedAsync(app);
+        // Apply pending migrations at startup
+        await ApplyMigrationsAsync(app);
         
         // Global exception handler for non-GraphQL endpoints
         app.UseExceptionHandler(errorApp =>
@@ -86,7 +84,7 @@ public class Program
         app.Run();
     }
 
-    private static async Task EnsureDatabaseCreatedAsync(WebApplication app)
+    private static async Task ApplyMigrationsAsync(WebApplication app)
     {
         using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -94,12 +92,12 @@ public class Program
         
         try
         {
-            await dbContext.Database.EnsureCreatedAsync();
-            logger.LogInformation("Database initialized successfully");
+            await dbContext.Database.MigrateAsync();
+            logger.LogInformation("Database migrations applied successfully");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while initializing the database");
+            logger.LogError(ex, "An error occurred while applying database migrations");
             throw;
         }
     }

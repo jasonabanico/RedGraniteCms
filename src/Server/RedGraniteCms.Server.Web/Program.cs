@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using RedGraniteCms.Server.Data;
 using RedGraniteCms.Server.Services;
 
@@ -11,9 +12,7 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Database
-        var connectionString = builder.Configuration.GetConnectionString("CosmosConnection");
-        builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseCosmos(connectionString!, "RedGraniteCms"));
+        builder.Services.AddDatabase(builder.Configuration, builder.Environment);
 
         // Application services
         builder.Services.AddRepositories();
@@ -24,11 +23,11 @@ public class Program
 
         var app = builder.Build();
 
-        // Ensure database is created at startup
+        // Apply pending migrations at startup
         using (var scope = app.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            await dbContext.Database.EnsureCreatedAsync();
+            await dbContext.Database.MigrateAsync();
         }
 
         if (!app.Environment.IsDevelopment())
@@ -39,7 +38,29 @@ public class Program
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
+
+        // Serve React admin app static files
+        var adminPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "admin");
+        if (Directory.Exists(adminPath))
+        {
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(adminPath),
+                RequestPath = "/admin"
+            });
+        }
+
         app.UseRouting();
+
+        // Map admin routes to React SPA (must be before other routes)
+        app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments("/admin"), admin =>
+        {
+            admin.UseRouting();
+            admin.UseEndpoints(endpoints =>
+            {
+                endpoints.MapFallbackToFile("/admin/{**path}", "/admin/index.html");
+            });
+        });
 
         app.MapControllerRoute(
             name: "page",
