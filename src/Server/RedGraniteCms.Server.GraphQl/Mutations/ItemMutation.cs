@@ -12,9 +12,9 @@ namespace RedGraniteCms.Server.GraphQl.Mutations;
 
 /// <summary>
 /// GraphQL mutations for Item operations.
-/// All mutations require authentication by default.
+/// TODO: Re-enable [Authorize] once authentication is configured.
 /// </summary>
-[Authorize]
+// [Authorize]
 public class ItemMutation
 {
     private readonly ILogger<ItemMutation> _logger;
