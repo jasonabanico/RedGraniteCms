@@ -9,16 +9,16 @@ namespace RedGraniteCms.Server.Web.Controllers;
 /// </summary>
 public class HomeController : Controller
 {
-    private readonly IPageModule _pageModule;
+    private readonly IPageService _pageService;
 
-    public HomeController(IPageModule pageModule)
+    public HomeController(IPageService pageService)
     {
-        _pageModule = pageModule;
+        _pageService = pageService;
     }
 
     public async Task<IActionResult> Index()
     {
-        var pages = await _pageModule.GetPublishedPagesAsync(count: 50);
+        var pages = await _pageService.GetPublishedPagesAsync(count: 50);
 
         var model = new HomeViewModel
         {

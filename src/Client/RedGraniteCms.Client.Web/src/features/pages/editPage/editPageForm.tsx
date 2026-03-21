@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
-import { ItemInput } from '../../../../__generated__/globalTypes';
+import type { PageInput } from '../../../modules/pages/types';
 import { useAppDispatch } from '../../../app/hooks';
 import { updatePage } from './editPageFormSlice';
-import pageService from '../../../services/pages';
+import pageService from '../../../modules/pages';
 import { LoadingSpinner, ErrorAlert } from '../../../components';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,14 +51,13 @@ export function EditPageForm() {
             try {
                 setIsLoading(true);
                 setError(null);
-                const response = await pageService.getPage(pageId);
-                const pageDetails = response?.GetItem;
+                const page = await pageService.getPage(pageId);
 
-                if (pageDetails) {
-                    setTitle(pageDetails.title);
-                    setSlug(pageDetails.slug || '');
-                    setSummary(pageDetails.summary || '');
-                    setContent(pageDetails.content || '');
+                if (page) {
+                    setTitle(page.title);
+                    setSlug(page.slug || '');
+                    setSummary(page.summary || '');
+                    setContent(page.content || '');
                 } else {
                     setError('Page not found');
                 }
@@ -97,7 +96,7 @@ export function EditPageForm() {
             return;
         }
 
-        const itemInput: ItemInput = {
+        const input: PageInput = {
             id: pageId || '',
             title,
             slug: slug || undefined,
@@ -109,7 +108,7 @@ export function EditPageForm() {
             setIsSubmitting(true);
             setError(null);
 
-            const resultAction = await dispatch(updatePage(itemInput));
+            const resultAction = await dispatch(updatePage(input));
 
             if (updatePage.rejected.match(resultAction)) {
                 throw new Error('Failed to update page');

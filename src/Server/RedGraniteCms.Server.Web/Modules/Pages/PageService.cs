@@ -5,13 +5,13 @@ using System.Text.Json.Serialization;
 namespace RedGraniteCms.Server.Web.Modules.Pages;
 
 /// <summary>
-/// Page module implementation. Communicates with the Api's GraphQL endpoint
+/// Page service implementation. Communicates with the Api's GraphQL endpoint
 /// and maps Item responses to Page models.
 /// </summary>
-public class PageModule : IPageModule
+public class PageService : IPageService
 {
     private readonly HttpClient _httpClient;
-    private readonly ILogger<PageModule> _logger;
+    private readonly ILogger<PageService> _logger;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -19,7 +19,7 @@ public class PageModule : IPageModule
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
     };
 
-    public PageModule(HttpClient httpClient, ILogger<PageModule> logger)
+    public PageService(HttpClient httpClient, ILogger<PageService> logger)
     {
         _httpClient = httpClient;
         _logger = logger;
@@ -63,11 +63,7 @@ public class PageModule : IPageModule
 
     private static Page MapToPage(ItemResponse item)
     {
-        JsonObject? metadata = null;
-        if (item.Metadata is not null)
-        {
-            metadata = item.Metadata;
-        }
+        JsonObject? metadata = item.Metadata;
 
         return new Page
         {
@@ -133,7 +129,7 @@ public class PageModule : IPageModule
 
     /// <summary>
     /// Internal DTO for deserializing GraphQL Item responses.
-    /// Private to the module — never exposed to controllers.
+    /// Private to the service — never exposed to controllers.
     /// </summary>
     private class ItemResponse
     {

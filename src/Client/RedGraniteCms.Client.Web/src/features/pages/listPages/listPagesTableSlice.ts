@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import pageService from '../../../services/pages';
+import pageService from '../../../modules/pages';
 import { IListPagesTableState } from './types';
 
 const initialState: IListPagesTableState = {
@@ -15,7 +15,7 @@ export const deletePage = createAsyncThunk(
             await pageService.deletePage(id);
             return id;
         } catch (err: any) {
-            return rejectWithValue(err.response.data);
+            return rejectWithValue(err.message ?? 'Unknown error');
         }
     }
 );

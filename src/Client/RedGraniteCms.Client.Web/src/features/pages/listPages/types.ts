@@ -1,7 +1,7 @@
-import { GetItems } from "../../../services/items/__generated__/GetItems";
+import type { Page } from "../../../modules/pages/types";
 
 export interface IListPagesTableState {
     initialLoad: boolean;
     page: number;
-    pages: GetItems["GetItems"] | null;
+    pages: Page[] | null;
 }

@@ -9,9 +9,9 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Modules — each module encapsulates API communication for a content type
+        // Services — each service encapsulates API communication for a content type
         var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5034/";
-        builder.Services.AddHttpClient<IPageModule, PageModule>(client =>
+        builder.Services.AddHttpClient<IPageService, PageService>(client =>
         {
             client.BaseAddress = new Uri(apiBaseUrl);
         });

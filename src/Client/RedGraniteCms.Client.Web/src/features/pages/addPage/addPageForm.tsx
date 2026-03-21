@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import { ItemInput } from '../../../../__generated__/globalTypes';
+import type { PageInput, AddPageResult } from '../../../modules/pages/types';
 import { useAppDispatch } from '../../../app/hooks';
-import { AddItem } from '../../../services/items/__generated__/AddItem';
 import { savePage } from '../listPages/listPagesTableSlice';
 import { addPage } from './addPageFormSlice';
 import { ErrorAlert } from '../../../components';
@@ -63,8 +62,7 @@ export function AddPageForm() {
             return;
         }
 
-        const itemInput: ItemInput = {
-            id: "",
+        const input: PageInput = {
             title,
             slug: slug || undefined,
             summary: summary || undefined,
@@ -75,15 +73,14 @@ export function AddPageForm() {
             setIsSubmitting(true);
             setError(null);
 
-            const savedPageAction = await dispatch(addPage(itemInput));
+            const savedPageAction = await dispatch(addPage(input));
 
             if (addPage.rejected.match(savedPageAction)) {
                 throw new Error('Failed to add page');
             }
 
-            const savedPage = savedPageAction.payload as AddItem;
-            itemInput.id = savedPage.AddItem ? savedPage.AddItem.id : "";
-            dispatch(savePage(itemInput));
+            const result = savedPageAction.payload as AddPageResult;
+            dispatch(savePage({ id: result.id, ...input }));
             navigate('/');
         } catch (err) {
             console.error('Error adding page:', err);

@@ -1,7 +1,7 @@
 namespace RedGraniteCms.Server.Web.Modules.Pages;
 
 /// <summary>
-/// Module-level content model for a CMS page.
+/// Content model for a CMS page.
 /// Controllers work with this — never with Item or ItemDto.
 /// </summary>
 public class Page

@@ -8,17 +8,17 @@ namespace RedGraniteCms.Server.Web.Controllers;
 /// </summary>
 public class PageController : Controller
 {
-    private readonly IPageModule _pageModule;
+    private readonly IPageService _pageService;
 
-    public PageController(IPageModule pageModule)
+    public PageController(IPageService pageService)
     {
-        _pageModule = pageModule;
+        _pageService = pageService;
     }
 
     [Route("{slug}")]
     public async Task<IActionResult> Index(string slug)
     {
-        var page = await _pageModule.GetPageBySlugAsync(slug);
+        var page = await _pageService.GetPageBySlugAsync(slug);
 
         if (page is null)
             return NotFound();

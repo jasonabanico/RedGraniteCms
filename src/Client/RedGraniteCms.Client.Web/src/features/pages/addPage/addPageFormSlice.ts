@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import pageService from '../../../services/pages';
-import { ItemInput } from '../../../../__generated__/globalTypes';
+import pageService from '../../../modules/pages';
+import type { PageInput } from '../../../modules/pages/types';
 import { IAddPageFormState } from './types';
 
 const initialState: IAddPageFormState = {
@@ -10,12 +10,12 @@ const initialState: IAddPageFormState = {
 
 export const addPage = createAsyncThunk(
     'addPageForm/addPage',
-    async (itemInput: ItemInput, { rejectWithValue }) => {
+    async (input: PageInput, { rejectWithValue }) => {
         try {
-            const data = await pageService.addPage(itemInput);
+            const data = await pageService.addPage(input);
             return data;
         } catch (err: any) {
-            return rejectWithValue(err.response.data);
+            return rejectWithValue(err.message ?? 'Unknown error');
         }
     }
 )
@@ -26,13 +26,13 @@ const addPageFormSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(addPage.pending, (state, action) => {
+            .addCase(addPage.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(addPage.fulfilled, (state, action) => {
+            .addCase(addPage.fulfilled, (state) => {
                 state.status = 'succeeded';
             })
-            .addCase(addPage.rejected, (state, action) => {
+            .addCase(addPage.rejected, (state) => {
                 state.status = 'failed';
                 state.error = 'Failed to save new page';
             })

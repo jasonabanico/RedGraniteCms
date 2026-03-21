@@ -3,10 +3,10 @@ import { createSelector } from "reselect";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../../app/hooks";
 import { setPages, resetInitialLoad, deletePage } from "./listPagesTableSlice";
-import pageService from "../../../services/pages";
+import pageService from "../../../modules/pages";
 import { makeSelectInitialLoad, makeSelectPages, makeSelectPage } from "./selectors";
 import { LoadingSpinner, ErrorAlert } from "../../../components";
-import { GetItems_GetItems } from "../../../services/items/__generated__/GetItems";
+import type { Page } from "../../../modules/pages/types";
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -47,7 +47,7 @@ export function ListPagesTable() {
         try {
             setIsLoading(true);
             setError(null);
-            const fetchedPages = await pageService.getPages("");
+            const fetchedPages = await pageService.getPages();
             if (fetchedPages) {
                 dispatch(setPages(fetchedPages));
             }
@@ -84,7 +84,7 @@ export function ListPagesTable() {
             const deleteAction = await dispatch(deletePage(id));
 
             if (deletePage.fulfilled.match(deleteAction)) {
-                dispatch(setPages(pages?.filter((p: GetItems_GetItems) => p.id !== id) || []));
+                dispatch(setPages(pages?.filter((p: Page) => p.id !== id) || []));
             } else {
                 setError("Failed to delete page. Please try again.");
             }
@@ -120,7 +120,7 @@ export function ListPagesTable() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {pages && pages.map((p: GetItems_GetItems) => (
+                    {pages && pages.map((p: Page) => (
                         <TableRow key={p.id}>
                             <TableCell>{p.title}</TableCell>
                             <TableCell>{p.slug}</TableCell>

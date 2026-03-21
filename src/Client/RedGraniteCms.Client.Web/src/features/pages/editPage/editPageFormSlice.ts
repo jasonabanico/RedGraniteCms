@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import pageService from '../../../services/pages';
-import { ItemInput } from '../../../../__generated__/globalTypes';
+import pageService from '../../../modules/pages';
+import type { PageInput } from '../../../modules/pages/types';
 import { IEditPageFormState } from './types';
 
 const initialState: IEditPageFormState = {
@@ -11,12 +11,12 @@ const initialState: IEditPageFormState = {
 
 export const updatePage = createAsyncThunk(
     'editPageForm/updatePage',
-    async (itemInput: ItemInput, { rejectWithValue }) => {
+    async (input: PageInput, { rejectWithValue }) => {
         try {
-            const data = await pageService.updatePage(itemInput);
+            const data = await pageService.updatePage(input);
             return data;
         } catch (err: any) {
-            return rejectWithValue(err.response?.data || 'Unknown error');
+            return rejectWithValue(err.message ?? 'Unknown error');
         }
     }
 );
